@@ -5,7 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="codeessentials.Extensions.Logging.Demystifier" Version="1.1.66" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.0" />
-    <PackageVersion Include="GuiLabs.Language.Xml" Version="1.2.74" />
+    <PackageVersion Include="GuiLabs.Language.Xml" Version="1.2.88" />
     <PackageVersion Include="IsExternalInit" Version="1.0.3" />
     <PackageVersion Include="Kysect.CommonLib" Version="0.1.13" />
     <PackageVersion Include="Kysect.CommonLib.DependencyInjection" Version="0.1.13" />
