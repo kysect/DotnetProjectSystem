@@ -106,4 +106,20 @@ public class DotnetProjectFileTests
 
         actual.Should().Be(expected);
     }
+
+    [Fact]
+    public void IsSdkFormat_ForEmptyFile_ReturnTrue()
+    {
+        var sut = DotnetProjectFile.CreateEmpty();
+
+        sut.IsSdkFormat().Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsSdkFormat_ForLegacyFormat_ReturnFalse()
+    {
+        var sut = DotnetProjectFile.Create(@"<Project ToolsVersion=""15.0""></Project>");
+
+        sut.IsSdkFormat().Should().BeFalse();
+    }
 }
