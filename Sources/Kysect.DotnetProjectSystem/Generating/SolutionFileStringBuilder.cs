@@ -32,4 +32,17 @@ public class SolutionFileStringBuilder
         _builder.Append(footer);
         return _builder.ToString();
     }
+
+    public SolutionFileStringBuilder AddProject(string projectName, string projectPath)
+    {
+        // TODO: Support generating of unique GUID
+        string projectDefinition = $$"""
+                                     Project("{{{Guid.Empty}}}") = "{{projectName}}", "{{projectPath}}", "{{{Guid.Empty}}}"
+                                     EndProject
+                                     """;
+
+        _builder.AppendLine(projectDefinition);
+
+        return this;
+    }
 }

@@ -26,8 +26,21 @@ public class SolutionFileStringBuilderTests
                        EndGlobal
                        """;
 
-        string actual = _sut.Build();
+        string slnFileContent = _sut.Build();
 
-        actual.Should().Be(expected);
+        slnFileContent.Should().Be(expected);
+    }
+
+    [Fact]
+    public void Build_AddProject_AddStringWithStringName()
+    {
+        string projectName = "Project";
+        string projectPath = @"Project\Project.csproj";
+
+        string slnFileContent = _sut
+            .AddProject(projectName, projectPath)
+            .Build();
+
+        slnFileContent.Should().Contain($"= \"{projectName}\", \"{projectPath}\",");
     }
 }
