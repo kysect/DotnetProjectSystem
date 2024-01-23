@@ -1,0 +1,38 @@
+<Project>
+  <!-- Default project values -->
+  <PropertyGroup>
+    <Authors>Kysect</Authors>
+    <Company>Kysect</Company>
+    <PackageIcon>Kysect-logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (c) Kysect 2024</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <!-- Specific project values -->
+  <PropertyGroup>
+    <RepositoryUrl>https://github.com/kysect/DotnetProjectSystem</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/kysect/DotnetProjectSystem</PackageProjectUrl>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <!-- Code configuration -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <DebugType>portable</DebugType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kysect.Editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(Configuration) == 'Release'">
+    <None Include="$(SolutionDir)..\Images\Kysect-logo.png" Pack="true" PackagePath="\" />
+    <None Include="$(SolutionDir)..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
