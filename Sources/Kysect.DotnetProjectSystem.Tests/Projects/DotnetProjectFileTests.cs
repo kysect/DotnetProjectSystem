@@ -59,4 +59,48 @@ public class DotnetProjectFileTests
 
         argumentException.Should().NotBeNull();
     }
+
+    [Fact]
+    public void GetProjectNode_ForEmptyNode_ReturnProjectNode()
+    {
+        var sut = DotnetProjectFile.CreateEmpty();
+
+        var projectNode = sut.GetProjectNode();
+
+        projectNode.Name.Should().Be("Project");
+    }
+
+    [Fact]
+    public void GetOrAddPropertyGroup_ForEmptyString_ReturnStringWithPropertyGroup()
+    {
+        string expected = """
+                          <Project>
+                            <PropertyGroup>
+                            </PropertyGroup>
+                          </Project>
+                          """;
+        var sut = DotnetProjectFile.CreateEmpty();
+
+        var propertyGroupNode = sut.GetOrAddPropertyGroup();
+        var actual = sut.ToXmlString();
+
+        actual.Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetOrAddPropertyGroup_ForXmlWithPropertyGroup_DocumentMustNotBeChanged()
+    {
+        string expected = """
+                          <Project>
+                            <PropertyGroup>
+                            </PropertyGroup>
+                          </Project>
+                          """;
+        var sut = DotnetProjectFile.Create(expected);
+
+        var propertyGroupNode = sut.GetOrAddPropertyGroup();
+        var actual = sut.ToXmlString();
+
+        actual.Should().Be(expected);
+    }
 }

@@ -1,13 +1,20 @@
-﻿using Microsoft.Language.Xml;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Xml;
+using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
 public class DotnetProjectFile
 {
-    private readonly XmlDocumentSyntax _content;
+    private XmlDocumentSyntax _content;
 
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
+        content.ThrowIfNull();
+
+        if (content.Root.Name != "Project")
+            throw new ArgumentException("XML root must be Project");
+
         _content = content;
     }
 
@@ -27,10 +34,31 @@ public class DotnetProjectFile
         if (xmlDocumentSyntax.RootSyntax is null)
             return CreateEmpty();
 
-        if (xmlDocumentSyntax.Root.Name != "Project")
-            throw new ArgumentException("XML root must be Project");
-
         return new DotnetProjectFile(xmlDocumentSyntax);
+    }
+
+    public IXmlElement GetProjectNode()
+    {
+        return _content.Root;
+    }
+
+    public IXmlElementSyntax GetOrAddPropertyGroup()
+    {
+        IXmlElement projectNode = GetProjectNode();
+        IXmlElementSyntax? propertyGroupNode = projectNode
+            .AsSyntaxElement
+            .Descendants()
+            .FirstOrDefault(s => s.Name == DotnetProjectFileConstant.PropertyGroup);
+
+        if (propertyGroupNode is not null)
+            return propertyGroupNode;
+
+        IXmlElementSyntax changedProjectNode = projectNode
+            .AsSyntaxElement
+            .AddChild(ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup, 1));
+
+        _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
+        return changedProjectNode;
     }
 
     public string ToXmlString()

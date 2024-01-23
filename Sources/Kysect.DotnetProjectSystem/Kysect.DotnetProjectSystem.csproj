@@ -4,5 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GuiLabs.Language.Xml" />
+    <PackageReference Include="Kysect.CommonLib" />
   </ItemGroup>
 </Project>
