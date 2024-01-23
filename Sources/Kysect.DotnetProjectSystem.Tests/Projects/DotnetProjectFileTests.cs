@@ -1,9 +1,12 @@
 ﻿using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Xml;
 
 namespace Kysect.DotnetProjectSystem.Tests.Projects;
 
 public class DotnetProjectFileTests
 {
+    private readonly XmlDocumentSyntaxFormatter _formatter = new XmlDocumentSyntaxFormatter();
+
     [Fact]
     public void CreateEmpty_ReturnXmlWithProjectNode()
     {
@@ -14,7 +17,7 @@ public class DotnetProjectFileTests
 
         var sut = DotnetProjectFile.CreateEmpty();
 
-        string actual = sut.ToXmlString();
+        string actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
     }
@@ -29,7 +32,7 @@ public class DotnetProjectFileTests
 
         var sut = DotnetProjectFile.Create(expected);
 
-        string actual = sut.ToXmlString();
+        string actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
     }
@@ -44,7 +47,7 @@ public class DotnetProjectFileTests
 
         var sut = DotnetProjectFile.Create(string.Empty);
 
-        string actual = sut.ToXmlString();
+        string actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
     }
@@ -82,7 +85,7 @@ public class DotnetProjectFileTests
         var sut = DotnetProjectFile.CreateEmpty();
 
         var propertyGroupNode = sut.GetOrAddPropertyGroup();
-        var actual = sut.ToXmlString();
+        var actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
     }
@@ -99,7 +102,7 @@ public class DotnetProjectFileTests
         var sut = DotnetProjectFile.Create(expected);
 
         var propertyGroupNode = sut.GetOrAddPropertyGroup();
-        var actual = sut.ToXmlString();
+        var actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
     }

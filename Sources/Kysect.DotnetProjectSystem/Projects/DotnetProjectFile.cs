@@ -55,14 +55,16 @@ public class DotnetProjectFile
 
         IXmlElementSyntax changedProjectNode = projectNode
             .AsSyntaxElement
-            .AddChild(ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup, 1));
+            .AddChild(ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup));
 
         _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
         return changedProjectNode;
     }
 
-    public string ToXmlString()
+    public string ToXmlString(XmlDocumentSyntaxFormatter formatter)
     {
-        return _content.ToFullString();
+        formatter.ThrowIfNull();
+
+        return formatter.Format(_content).ToFullString();
     }
 }
