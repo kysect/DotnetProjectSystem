@@ -67,4 +67,10 @@ public class DotnetProjectFile
 
         return formatter.Format(_content).ToFullString();
     }
+
+    public bool IsSdkFormat()
+    {
+        IXmlElement projectNode = GetProjectNode();
+        return projectNode.Attributes.All(a => a.Key != DotnetProjectFileConstant.ToolsVersion);
+    }
 }
