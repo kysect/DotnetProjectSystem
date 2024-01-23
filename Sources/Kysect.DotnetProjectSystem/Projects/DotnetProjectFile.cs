@@ -19,7 +19,18 @@ public class DotnetProjectFile
             </Project>
             """;
 
-        return new DotnetProjectFile(Parser.ParseText(contentTemplate));
+        return Create(contentTemplate);
+    }
+    public static DotnetProjectFile Create(string content)
+    {
+        XmlDocumentSyntax xmlDocumentSyntax = Parser.ParseText(content);
+        if (xmlDocumentSyntax.RootSyntax is null)
+            return CreateEmpty();
+
+        if (xmlDocumentSyntax.Root.Name != "Project")
+            throw new ArgumentException("XML root must be Project");
+
+        return new DotnetProjectFile(xmlDocumentSyntax);
     }
 
     public string ToXmlString()
