@@ -63,4 +63,16 @@ public class SolutionFileStructureBuilder
 
         return solutionFileStringBuilder.Build();
     }
+
+    public string CreateSolutionFile(IFileSystem fileSystem)
+    {
+        fileSystem.ThrowIfNull();
+
+        var solutionFileStringBuilder = new SolutionFileStringBuilder();
+
+        foreach (ProjectFileStructureBuilder? projectBuilder in _projects)
+            solutionFileStringBuilder.AddProject(projectBuilder.ProjectName, fileSystem.Path.Combine(projectBuilder.ProjectName, $"{projectBuilder.ProjectName}.csproj"));
+
+        return solutionFileStringBuilder.Build();
+    }
 }
