@@ -73,4 +73,17 @@ public class DotnetProjectFile
         IXmlElement projectNode = GetProjectNode();
         return projectNode.Attributes.All(a => a.Key != DotnetProjectFileConstant.ToolsVersion);
     }
+
+    public IReadOnlyCollection<DotnetProjectItem> GetItems(string group)
+    {
+        List<DotnetProjectItem> items = _content
+            .Descendants()
+            .Where(n => n.Name == group)
+            .Select(n => n.GetAttributeValue("Include"))
+            .Where(n => n is not null)
+            .Select(n => new DotnetProjectItem(group, n))
+            .ToList();
+
+        return items;
+    }
 }

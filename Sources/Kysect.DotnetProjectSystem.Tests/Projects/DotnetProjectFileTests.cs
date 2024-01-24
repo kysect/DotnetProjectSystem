@@ -122,4 +122,27 @@ public class DotnetProjectFileTests
 
         sut.IsSdkFormat().Should().BeFalse();
     }
+
+    [Fact]
+    public void GetItems_ForProjectWithCompileNode_ReturnItem()
+    {
+        var content = """
+                      <Project>
+                        <ItemGroup>
+                          <Compile Include="File.cs">
+                          <Compile Include="File2.cs">
+                        </ItemGroup>
+                      </Project>
+                      """;
+        DotnetProjectItem[] exptected = [
+            new DotnetProjectItem("Compile", "File.cs"),
+            new DotnetProjectItem("Compile", "File2.cs")
+        ];
+
+        var sut = DotnetProjectFile.Create(content);
+
+        IReadOnlyCollection<DotnetProjectItem> compileItems = sut.GetItems("Compile");
+
+        compileItems.Should().BeEquivalentTo(exptected);
+    }
 }
