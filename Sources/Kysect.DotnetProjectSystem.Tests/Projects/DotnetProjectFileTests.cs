@@ -78,8 +78,7 @@ public class DotnetProjectFileTests
     {
         string expected = """
                           <Project>
-                            <PropertyGroup>
-                            </PropertyGroup>
+                            <PropertyGroup></PropertyGroup>
                           </Project>
                           """;
         var sut = DotnetProjectFile.CreateEmpty();

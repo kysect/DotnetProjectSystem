@@ -90,6 +90,22 @@ public class XmlDocumentSyntaxFormatterTests
 
         Validate(input, expected);
     }
+    [Fact]
+    public void Format_NodeWithContent_NodeInOneLine()
+    {
+        var expected = """
+                       <Project>
+                         <Node1>Some text</Node1>
+                       </Project>
+                       """;
+
+        var input = """
+                    <Project><Node1>Some text</Node1>
+                    </Project>
+                    """;
+
+        Validate(input, expected);
+    }
 
     private void Validate(string input, string expected)
     {

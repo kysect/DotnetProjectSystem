@@ -51,7 +51,6 @@ public class DotnetSolutionParserTests
                                     <ImplicitUsings>enable</ImplicitUsings>
                                     <Nullable>enable</Nullable>
                                   </PropertyGroup>
-                                
                                   <ItemGroup>
                                     <PackageReference Include="FluentAssertions" />
                                     <PackageReference Include="Microsoft.NET.Test.Sdk" />

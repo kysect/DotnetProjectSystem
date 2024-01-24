@@ -67,16 +67,22 @@ public class XmlDocumentSyntaxFormatter
         xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia));
 
         // TODO: remove this hack for first node
-        if (depth != 0)
+        bool needTriviaForStartTag = depth != 0;
+        if (needTriviaForStartTag)
         {
             xmlElementSyntax = xmlElementSyntax.ReplaceNode(
                 xmlElementSyntax.StartTag,
                 xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia)));
         }
 
-        xmlElementSyntax = xmlElementSyntax.ReplaceNode(
-            xmlElementSyntax.EndTag,
-            xmlElementSyntax.EndTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia)));
+        bool needTriviaForEndTag = xmlElementSyntax.Elements.Any();
+        if (needTriviaForEndTag)
+        {
+            xmlElementSyntax = xmlElementSyntax.ReplaceNode(
+                xmlElementSyntax.EndTag,
+                xmlElementSyntax.EndTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia)));
+
+        }
 
         return xmlElementSyntax;
     }
