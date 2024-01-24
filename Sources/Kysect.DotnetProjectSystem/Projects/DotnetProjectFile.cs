@@ -1,4 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
 
@@ -77,13 +78,33 @@ public class DotnetProjectFile
     public IReadOnlyCollection<DotnetProjectItem> GetItems(string group)
     {
         List<DotnetProjectItem> items = _content
-            .Descendants()
-            .Where(n => n.Name == group)
+            .GetNodesByName(group)
             .Select(n => n.GetAttributeValue("Include"))
             .Where(n => n is not null)
             .Select(n => new DotnetProjectItem(group, n))
             .ToList();
 
         return items;
+    }
+
+    public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
+    {
+        return _content
+            .GetNodesByName(property)
+            .Select(xmlElementSyntax => new DotnetProjectProperty(property, xmlElementSyntax.Content.ToFullString()))
+            .ToList();
+    }
+
+    public DotnetProjectProperty GetProperty(string property)
+    {
+        IReadOnlyCollection<DotnetProjectProperty> properties = GetProperties(property);
+
+        if (properties.Count > 1)
+            throw new DotnetProjectSystemException($"Duplicated property {property}");
+
+        if (properties.Count == 0)
+            throw new DotnetProjectSystemException($"Property {property} missed");
+
+        return properties.Single();
     }
 }

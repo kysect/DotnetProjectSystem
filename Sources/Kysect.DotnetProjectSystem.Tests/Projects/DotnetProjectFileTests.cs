@@ -129,8 +129,8 @@ public class DotnetProjectFileTests
         var content = """
                       <Project>
                         <ItemGroup>
-                          <Compile Include="File.cs">
-                          <Compile Include="File2.cs">
+                          <Compile Include="File.cs" />
+                          <Compile Include="File2.cs" />
                         </ItemGroup>
                       </Project>
                       """;
@@ -144,5 +144,24 @@ public class DotnetProjectFileTests
         IReadOnlyCollection<DotnetProjectItem> compileItems = sut.GetItems("Compile");
 
         compileItems.Should().BeEquivalentTo(exptected);
+    }
+
+    [Fact]
+    public void GetProperty_ForProjectWithProperty_ReturnValue()
+    {
+        var content = """
+                      <Project>
+                        <PropertyGroup>
+                          <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                      </Project>
+                      """;
+
+        DotnetProjectProperty exptected = new DotnetProjectProperty("TargetFramework", "net8.0");
+        var sut = DotnetProjectFile.Create(content);
+
+        DotnetProjectProperty compileItems = sut.GetProperty("TargetFramework");
+
+        compileItems.Should().Be(exptected);
     }
 }
