@@ -2,6 +2,7 @@
 using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
 using System.IO.Abstractions.TestingHelpers;
@@ -25,6 +26,18 @@ public class DotnetSolutionParserTests
 
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _xmlDocumentSyntaxFormatter = new XmlDocumentSyntaxFormatter();
+    }
+
+    [Fact]
+    public void Parse_FileThatIsNotExist_ThrowException()
+    {
+        string solutionName = "Solution";
+        string solutionPath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
+
+        Assert.Throws<DotnetProjectSystemException>(() =>
+        {
+            _solutionStructureParser.Parse(solutionPath);
+        });
     }
 
     [Fact]
