@@ -1,4 +1,5 @@
 ﻿using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 
 namespace Kysect.DotnetProjectSystem.Tests.Projects;
@@ -143,6 +144,44 @@ public class DotnetProjectFileTests
         IReadOnlyCollection<DotnetProjectItem> compileItems = sut.GetItems("Compile");
 
         compileItems.Should().BeEquivalentTo(exptected);
+    }
+
+    [Fact]
+    public void GetProperty_ForEmptyProject_ThrowException()
+    {
+        var content = """
+                      <Project>
+                        <PropertyGroup>
+                        </PropertyGroup>
+                      </Project>
+                      """;
+
+        var sut = DotnetProjectFile.Create(content);
+
+        Assert.Throws<DotnetProjectSystemException>(() =>
+        {
+            sut.GetProperty("TargetFramework");
+        });
+    }
+
+    [Fact]
+    public void GetProperty_ForProjectWithDuplicatedProperties_ThrowException()
+    {
+        var content = """
+                      <Project>
+                        <PropertyGroup>
+                      <TargetFramework>net8.0</TargetFramework>
+                          <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                      </Project>
+                      """;
+
+        var sut = DotnetProjectFile.Create(content);
+
+        Assert.Throws<DotnetProjectSystemException>(() =>
+        {
+            sut.GetProperty("TargetFramework");
+        });
     }
 
     [Fact]
