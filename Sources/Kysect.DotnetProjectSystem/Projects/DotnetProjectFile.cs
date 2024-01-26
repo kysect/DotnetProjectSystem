@@ -95,7 +95,7 @@ public class DotnetProjectFile
             .ToList();
     }
 
-    public DotnetProjectProperty GetProperty(string property)
+    public DotnetProjectProperty? FindProperty(string property)
     {
         IReadOnlyCollection<DotnetProjectProperty> properties = GetProperties(property);
 
@@ -103,8 +103,18 @@ public class DotnetProjectFile
             throw new DotnetProjectSystemException($"Duplicated property {property}");
 
         if (properties.Count == 0)
-            throw new DotnetProjectSystemException($"Property {property} missed");
+            return null;
 
         return properties.Single();
+    }
+
+    public DotnetProjectProperty GetProperty(string property)
+    {
+        DotnetProjectProperty? dotnetProjectProperty = FindProperty(property);
+
+        if (dotnetProjectProperty is null)
+            throw new DotnetProjectSystemException($"Property {property} missed");
+
+        return dotnetProjectProperty.Value;
     }
 }
