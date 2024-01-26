@@ -1,13 +1,32 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
+using Microsoft.Extensions.Logging;
 using Microsoft.Language.Xml;
+using System.IO.Abstractions;
+using System.Xml.Linq;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
 public class DotnetProjectFile
 {
     private XmlDocumentSyntax _content;
+
+    public static DotnetProjectFile Create(string path, IFileSystem fileSystem, ILogger logger)
+    {
+        path.ThrowIfNull();
+        fileSystem.ThrowIfNull();
+        logger.ThrowIfNull();
+
+        string csprojContent =
+            fileSystem.File.Exists(path)
+                ? fileSystem.File.ReadAllText(path)
+                : string.Empty;
+
+        XmlDocumentSyntax root = Parser.ParseText(csprojContent);
+        return new DotnetProjectFile(root);
+    }
 
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
@@ -38,6 +57,21 @@ public class DotnetProjectFile
         return new DotnetProjectFile(xmlDocumentSyntax);
     }
 
+    public void UpdateDocument(Func<XmlDocumentSyntax, XmlDocumentSyntax> morphism)
+    {
+        morphism.ThrowIfNull();
+        _content = morphism(_content);
+    }
+
+    public void UpdateDocument<TSyntax>(IXmlProjectFileModifyStrategy<TSyntax> modifyStrategy)
+        where TSyntax : SyntaxNode
+    {
+        modifyStrategy.ThrowIfNull();
+
+        IReadOnlyCollection<TSyntax> nodes = modifyStrategy.SelectNodeForModify(_content);
+        _content = _content.ReplaceNodes(nodes, (_, n) => modifyStrategy.ApplyChanges(n));
+    }
+
     public IXmlElement GetProjectNode()
     {
         return _content.Root;
@@ -60,13 +94,6 @@ public class DotnetProjectFile
 
         _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
         return changedProjectNode;
-    }
-
-    public string ToXmlString(XmlDocumentSyntaxFormatter formatter)
-    {
-        formatter.ThrowIfNull();
-
-        return formatter.Format(_content).ToFullString();
     }
 
     public bool IsSdkFormat()
@@ -116,5 +143,12 @@ public class DotnetProjectFile
             throw new DotnetProjectSystemException($"Property {property} missed");
 
         return dotnetProjectProperty.Value;
+    }
+
+    public string ToXmlString(XmlDocumentSyntaxFormatter formatter)
+    {
+        formatter.ThrowIfNull();
+
+        return formatter.Format(_content).ToFullString();
     }
 }
