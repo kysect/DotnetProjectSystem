@@ -16,6 +16,7 @@ public class DotnetSolutionParserTests
 
     private readonly string _currentPath;
     private readonly XmlDocumentSyntaxFormatter _xmlDocumentSyntaxFormatter;
+    private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
 
     public DotnetSolutionParserTests()
     {
@@ -25,7 +26,8 @@ public class DotnetSolutionParserTests
         _solutionStructureParser = new DotnetSolutionParser(_fileSystem, logger);
 
         _currentPath = _fileSystem.Path.GetFullPath(".");
-        _xmlDocumentSyntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _xmlDocumentSyntaxFormatter = _syntaxFormatter;
     }
 
     [Fact]
@@ -45,8 +47,9 @@ public class DotnetSolutionParserTests
     {
         string solutionName = "Solution";
         string solutionPath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
+
         new SolutionFileStructureBuilder(solutionName)
-            .Save(_fileSystem, _currentPath);
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         DotnetSolutionDescriptor solutionDescriptor = _solutionStructureParser.Parse(solutionPath);
 
@@ -62,23 +65,20 @@ public class DotnetSolutionParserTests
                                   <PropertyGroup>
                                     <TargetFramework>net8.0</TargetFramework>
                                     <ImplicitUsings>enable</ImplicitUsings>
-                                    <Nullable>enable</Nullable>
                                   </PropertyGroup>
-                                  <ItemGroup>
-                                    <PackageReference Include="FluentAssertions" />
-                                    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-                                  </ItemGroup>
                                 </Project>
                                 """;
 
         string solutionName = "Solution";
         string projectName = "ProjectName";
         string projectPath = _fileSystem.Path.Combine(_currentPath, projectName, $"{projectName}.csproj");
-
         string solutionFilePath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
+
         new SolutionFileStructureBuilder(solutionName)
-            .AddProject(new ProjectFileStructureBuilder(projectName, projectContent))
-            .Save(_fileSystem, _currentPath);
+            .AddProject(
+                new ProjectFileStructureBuilder(projectName)
+                    .SetContent(projectContent))
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         DotnetSolutionDescriptor solutionDescriptor = _solutionStructureParser.Parse(solutionFilePath);
         solutionDescriptor.Projects.Should().HaveCount(1);

@@ -5,7 +5,12 @@ namespace Kysect.DotnetProjectSystem.Tests.Xml;
 
 public class XmlDocumentSyntaxFormatterTests
 {
-    private readonly XmlDocumentSyntaxFormatter _formatter = new XmlDocumentSyntaxFormatter();
+    private readonly XmlDocumentSyntaxFormatter _formatter;
+
+    public XmlDocumentSyntaxFormatterTests()
+    {
+        _formatter = new XmlDocumentSyntaxFormatter();
+    }
 
     [Fact]
     public void Format_FormatterDocument_ReturnStringWithoutChanges()

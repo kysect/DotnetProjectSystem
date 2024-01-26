@@ -35,7 +35,7 @@ public class SolutionFileStructureBuilder
         return this;
     }
 
-    public void Save(IFileSystem fileSystem, string rootPath)
+    public void Save(IFileSystem fileSystem, string rootPath, XmlDocumentSyntaxFormatter syntaxFormatter)
     {
         fileSystem.ThrowIfNull();
 
@@ -49,7 +49,7 @@ public class SolutionFileStructureBuilder
         }
 
         foreach (ProjectFileStructureBuilder projectBuilder in _projects)
-            projectBuilder.Save(fileSystem, rootPath, new XmlDocumentSyntaxFormatter());
+            projectBuilder.Save(fileSystem, rootPath, syntaxFormatter);
     }
 
     public string CreateSolutionFile(IFileSystem fileSystem)

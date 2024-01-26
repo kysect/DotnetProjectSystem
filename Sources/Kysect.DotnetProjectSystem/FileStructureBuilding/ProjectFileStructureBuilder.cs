@@ -56,7 +56,7 @@ public class ProjectFileStructureBuilder
         return this;
     }
 
-    public void Save(IFileSystem fileSystem, string rootPath, XmlDocumentSyntaxFormatter xmlDocumentSyntaxFormatter)
+    public void Save(IFileSystem fileSystem, string rootPath, XmlDocumentSyntaxFormatter syntaxFormatter)
     {
         fileSystem.ThrowIfNull();
 
@@ -64,7 +64,7 @@ public class ProjectFileStructureBuilder
         string csprojPath = fileSystem.Path.Combine(csprojDirectoryPath, $"{ProjectName}.csproj");
 
         fileSystem.EnsureDirectoryExists(csprojDirectoryPath);
-        string csprojContent = _projectFile.ToXmlString(xmlDocumentSyntaxFormatter);
+        string csprojContent = _projectFile.ToXmlString(syntaxFormatter);
         fileSystem.File.WriteAllText(csprojPath, csprojContent);
 
         foreach (SolutionFileInfoElement? solutionFileInfo in _files)
