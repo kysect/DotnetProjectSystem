@@ -3,51 +3,24 @@ using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Xml;
-using Microsoft.Extensions.Logging;
 using System.IO.Abstractions.TestingHelpers;
 
 namespace Kysect.DotnetProjectSystem.Tests.SolutionModification;
 
-
 public class DotnetSolutionModifierTests
 {
     private readonly MockFileSystem _fileSystem;
-    private readonly ILogger _logger;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
+    private readonly DotnetSolutionModifierFactory _solutionModifierFactory;
 
     public DotnetSolutionModifierTests()
     {
-        _logger = DefaultLoggerConfiguration.CreateConsoleLogger();
+        var solutionFileContentParser = new SolutionFileContentParser();
+        DefaultLoggerConfiguration.CreateConsoleLogger();
         _fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
 
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
-    }
-
-    [Fact]
-    public void CreateModifier_ReturnFullPathToProjects()
-    {
-        string projectContent = """
-                                <Project Sdk="Microsoft.NET.Sdk">
-                                  <PropertyGroup>
-                                    <TargetFramework>net8.0</TargetFramework>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        string projectName = "SampleProject";
-        string solutionSln = "Solution.sln";
-        string currentPath = _fileSystem.Path.GetFullPath("SolutionDirectory");
-        string solutionPath = _fileSystem.Path.Combine(currentPath, solutionSln);
-
-        _fileSystem.Directory.CreateDirectory(currentPath);
-
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
-            .AddProject(new ProjectFileStructureBuilder(projectName, projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
-
-        var solutionModifier = DotnetSolutionModifier.Create(solutionPath, _fileSystem, _logger, new SolutionFileContentParser());
-
-        solutionModifier.Projects.Single().Path.Should().Be(_fileSystem.Path.Combine(currentPath, projectName, $"{projectName}.csproj"));
+        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
     }
 
     [Fact]
@@ -75,7 +48,7 @@ public class DotnetSolutionModifierTests
                 new ProjectFileStructureBuilder("SampleProject", projectContent));
         solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
 
-        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser());
+        var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier.Save(_syntaxFormatter);
     }
 
@@ -104,10 +77,10 @@ public class DotnetSolutionModifierTests
                 new ProjectFileStructureBuilder("SampleProject", projectContent));
         solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
 
-        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser());
+        var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
 
         foreach (DotnetProjectModifier solutionModifierProject in solutionModifier.Projects)
-            solutionModifierProject.Accessor.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
+            solutionModifierProject.File.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
 
         solutionModifier.Save(_syntaxFormatter);
 

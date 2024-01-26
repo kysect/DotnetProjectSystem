@@ -2,10 +2,8 @@
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
-using Microsoft.Extensions.Logging;
 using Microsoft.Language.Xml;
 using System.IO.Abstractions;
-using System.Xml.Linq;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
@@ -13,11 +11,10 @@ public class DotnetProjectFile
 {
     private XmlDocumentSyntax _content;
 
-    public static DotnetProjectFile Create(string path, IFileSystem fileSystem, ILogger logger)
+    public static DotnetProjectFile Create(string path, IFileSystem fileSystem)
     {
         path.ThrowIfNull();
         fileSystem.ThrowIfNull();
-        logger.ThrowIfNull();
 
         string csprojContent =
             fileSystem.File.Exists(path)
@@ -31,6 +28,7 @@ public class DotnetProjectFile
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
         content.ThrowIfNull();
+        content.RootSyntax.ThrowIfNull();
 
         if (content.Root.Name != "Project")
             throw new ArgumentException("XML root must be Project");
