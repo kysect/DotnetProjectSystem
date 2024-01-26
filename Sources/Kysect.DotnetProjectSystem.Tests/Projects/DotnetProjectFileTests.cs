@@ -1,6 +1,7 @@
 ﻿using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
+using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Tests.Projects;
 
@@ -74,7 +75,7 @@ public class DotnetProjectFileTests
     {
         var sut = DotnetProjectFile.CreateEmpty();
 
-        var projectNode = sut.GetProjectNode();
+        IXmlElement projectNode = sut.GetProjectNode();
 
         projectNode.Name.Should().Be("Project");
     }
@@ -89,10 +90,11 @@ public class DotnetProjectFileTests
                           """;
         var sut = DotnetProjectFile.CreateEmpty();
 
-        var propertyGroupNode = sut.GetOrAddPropertyGroup();
-        var actual = sut.ToXmlString(_formatter);
+        IXmlElementSyntax propertyGroupNode = sut.GetOrAddPropertyGroup();
+        string actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
+        propertyGroupNode.Name.Should().Be("PropertyGroup");
     }
 
     [Fact]
@@ -104,18 +106,26 @@ public class DotnetProjectFileTests
                             </PropertyGroup>
                           </Project>
                           """;
-        var sut = DotnetProjectFile.Create(expected);
 
+        var sut = DotnetProjectFile.Create(expected);
         var propertyGroupNode = sut.GetOrAddPropertyGroup();
         var actual = sut.ToXmlString(_formatter);
 
         actual.Should().Be(expected);
+        propertyGroupNode.Name.Should().Be("PropertyGroup");
     }
 
     [Fact]
     public void IsSdkFormat_ForEmptyFile_ReturnTrue()
     {
-        var sut = DotnetProjectFile.CreateEmpty();
+        string projectContent = """
+                                <Project>
+                                  <PropertyGroup>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        var sut = DotnetProjectFile.Create(projectContent);
 
         sut.IsSdkFormat().Should().BeTrue();
     }
@@ -123,7 +133,12 @@ public class DotnetProjectFileTests
     [Fact]
     public void IsSdkFormat_ForLegacyFormat_ReturnFalse()
     {
-        var sut = DotnetProjectFile.Create(@"<Project ToolsVersion=""15.0""></Project>");
+        string projectContent = """
+                                <Project ToolsVersion="15.0">
+                                </Project>
+                                """;
+
+        var sut = DotnetProjectFile.Create(projectContent);
 
         sut.IsSdkFormat().Should().BeFalse();
     }
@@ -131,24 +146,23 @@ public class DotnetProjectFileTests
     [Fact]
     public void GetItems_ForProjectWithCompileNode_ReturnItem()
     {
-        var content = """
-                      <Project>
-                        <ItemGroup>
-                          <Compile Include="File.cs" />
-                          <Compile Include="File2.cs" />
-                        </ItemGroup>
-                      </Project>
-                      """;
-        DotnetProjectItem[] exptected = [
-            new DotnetProjectItem("Compile", "File.cs"),
-            new DotnetProjectItem("Compile", "File2.cs")
-        ];
+        const string content = """
+                               <Project>
+                                 <ItemGroup>
+                                   <Compile Include="File.cs" />
+                                   <Compile Include="File2.cs" />
+                                 </ItemGroup>
+                               </Project>
+                               """;
 
         var sut = DotnetProjectFile.Create(content);
 
         IReadOnlyCollection<DotnetProjectItem> compileItems = sut.GetItems("Compile");
 
-        compileItems.Should().BeEquivalentTo(exptected);
+        compileItems.Should().BeEquivalentTo([
+            new DotnetProjectItem("Compile", "File.cs"),
+            new DotnetProjectItem("Compile", "File2.cs")
+        ]);
     }
 
     [Fact]
@@ -175,7 +189,7 @@ public class DotnetProjectFileTests
         var content = """
                       <Project>
                         <PropertyGroup>
-                      <TargetFramework>net8.0</TargetFramework>
+                          <TargetFramework>net8.0</TargetFramework>
                           <TargetFramework>net8.0</TargetFramework>
                         </PropertyGroup>
                       </Project>
@@ -200,11 +214,10 @@ public class DotnetProjectFileTests
                       </Project>
                       """;
 
-        DotnetProjectProperty exptected = new DotnetProjectProperty("TargetFramework", "net8.0");
         var sut = DotnetProjectFile.Create(content);
 
         DotnetProjectProperty compileItems = sut.GetProperty("TargetFramework");
 
-        compileItems.Should().Be(exptected);
+        compileItems.Should().Be(new DotnetProjectProperty("TargetFramework", "net8.0"));
     }
 }
