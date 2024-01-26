@@ -1,4 +1,6 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
+using Kysect.DotnetProjectSystem.Tests.Asserts;
+using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions.TestingHelpers;
 
 namespace Kysect.DotnetProjectSystem.Tests.FileStructureBuilding;
@@ -7,11 +9,15 @@ public class ProjectFileStructureBuilderTests
 {
     private readonly string _rootPath;
     private readonly MockFileSystem _fileSystem;
+    private readonly FileSystemAsserts _asserts;
+    private readonly XmlDocumentSyntaxFormatter _xmlDocumentSyntaxFormatter;
 
     public ProjectFileStructureBuilderTests()
     {
         _fileSystem = new MockFileSystem();
         _rootPath = _fileSystem.Path.GetFullPath(".");
+        _xmlDocumentSyntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _asserts = new FileSystemAsserts(_fileSystem);
     }
 
     [Fact]
@@ -19,13 +25,15 @@ public class ProjectFileStructureBuilderTests
     {
         string projectName = "Project1";
         string projectFileContent = "<Project></Project>";
-        string expectedProjectPath = _fileSystem.Path.Combine(_rootPath, $"{projectName}", $"{projectName}.csproj");
 
-        var projectFileStructureBuilder = new ProjectFileStructureBuilder(projectName, projectFileContent);
-        projectFileStructureBuilder.Save(_fileSystem, _rootPath);
+        new ProjectFileStructureBuilder(projectName)
+            .SetContent(projectFileContent)
+            .Save(_fileSystem, _rootPath, _xmlDocumentSyntaxFormatter);
 
-        _fileSystem.File.Exists(expectedProjectPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(expectedProjectPath).Should().BeEquivalentTo(projectFileContent);
+        _asserts
+            .File(_rootPath, $"{projectName}", $"{projectName}.csproj")
+            .ShouldExists()
+            .ShouldHaveContent(projectFileContent);
     }
 
     [Fact]
@@ -36,13 +44,15 @@ public class ProjectFileStructureBuilderTests
         string filePartialPath = "SomeFile.txt";
         string fileFullPath = _fileSystem.Path.Combine(_rootPath, $"{projectName}", filePartialPath);
 
-        var projectFileStructureBuilder = new ProjectFileStructureBuilder(projectName, projectFileContent)
-            .AddEmptyFile([filePartialPath]);
+        new ProjectFileStructureBuilder(projectName)
+            .SetContent(projectFileContent)
+            .AddEmptyFile(filePartialPath)
+            .Save(_fileSystem, _rootPath, _xmlDocumentSyntaxFormatter);
 
-        projectFileStructureBuilder.Save(_fileSystem, _rootPath);
-
-        _fileSystem.File.Exists(fileFullPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(fileFullPath).Should().BeEmpty();
+        _asserts
+            .File(fileFullPath)
+            .ShouldExists()
+            .ShouldHaveEmptyContent();
     }
 
     [Fact]
@@ -54,13 +64,15 @@ public class ProjectFileStructureBuilderTests
         string fileContent = "some text";
         string fileFullPath = _fileSystem.Path.Combine(_rootPath, $"{projectName}", filePartialPath);
 
-        var projectFileStructureBuilder = new ProjectFileStructureBuilder(projectName, projectFileContent)
-            .AddFile([filePartialPath], fileContent);
+        new ProjectFileStructureBuilder(projectName)
+            .SetContent(projectFileContent)
+            .AddFile([filePartialPath], fileContent)
+            .Save(_fileSystem, _rootPath, _xmlDocumentSyntaxFormatter);
 
-        projectFileStructureBuilder.Save(_fileSystem, _rootPath);
-
-        _fileSystem.File.Exists(fileFullPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(fileFullPath).Should().Be(fileContent);
+        _asserts
+            .File(fileFullPath)
+            .ShouldExists()
+            .ShouldHaveContent(fileContent);
     }
 
     [Fact]
@@ -69,15 +81,17 @@ public class ProjectFileStructureBuilderTests
         string projectName = "Project1";
         string projectFileContent = "<Project></Project>";
         string filePartialPath = "SomeFile.txt";
-        var subdirectoryName = "Subdirectory";
+        string subdirectoryName = "Subdirectory";
         string fileFullPath = _fileSystem.Path.Combine(_rootPath, $"{projectName}", subdirectoryName, filePartialPath);
 
-        var projectFileStructureBuilder = new ProjectFileStructureBuilder(projectName, projectFileContent)
-            .AddEmptyFile([subdirectoryName, filePartialPath]);
+        new ProjectFileStructureBuilder(projectName)
+            .SetContent(projectFileContent)
+            .AddEmptyFile(subdirectoryName, filePartialPath)
+            .Save(_fileSystem, _rootPath, _xmlDocumentSyntaxFormatter);
 
-        projectFileStructureBuilder.Save(_fileSystem, _rootPath);
-
-        _fileSystem.File.Exists(fileFullPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(fileFullPath).Should().BeEmpty();
+        _asserts
+            .File(fileFullPath)
+            .ShouldExists()
+            .ShouldHaveEmptyContent();
     }
 }

@@ -1,6 +1,6 @@
-﻿using Kysect.DotnetProjectSystem.Generating;
+﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 
-namespace Kysect.DotnetProjectSystem.Tests.Generating;
+namespace Kysect.DotnetProjectSystem.Tests.FileStructureBuilding;
 
 public class SolutionFileStringBuilderTests
 {

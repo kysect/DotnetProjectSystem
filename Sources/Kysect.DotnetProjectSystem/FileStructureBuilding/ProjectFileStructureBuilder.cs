@@ -1,21 +1,43 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
 
 public class ProjectFileStructureBuilder
 {
-    private readonly string _projectFileContent;
+    private DotnetProjectFile _projectFile;
     private readonly List<SolutionFileInfoElement> _files;
 
     public string ProjectName { get; }
 
-    public ProjectFileStructureBuilder(string projectName, string projectFileContent)
+    public ProjectFileStructureBuilder(string projectName)
     {
         ProjectName = projectName;
-        _projectFileContent = projectFileContent;
-
         _files = new List<SolutionFileInfoElement>();
+        _projectFile = DotnetProjectFile.CreateEmpty();
+    }
+
+    public ProjectFileStructureBuilder(string projectName, string projectFileContent) : this(projectName)
+    {
+        _projectFile = DotnetProjectFile.Create(projectFileContent);
+    }
+
+    public ProjectFileStructureBuilder(string projectName, DotnetProjectFile projectFileContent) : this(projectName)
+    {
+        _projectFile = projectFileContent;
+    }
+
+    public ProjectFileStructureBuilder SetContent(string projectFileContent)
+    {
+        return SetContent(DotnetProjectFile.Create(projectFileContent));
+    }
+
+    public ProjectFileStructureBuilder SetContent(DotnetProjectFile projectFileContent)
+    {
+        _projectFile = projectFileContent;
+        return this;
     }
 
     public ProjectFileStructureBuilder AddEmptyFile(params string[] path)
@@ -34,17 +56,20 @@ public class ProjectFileStructureBuilder
         return this;
     }
 
-    public void Save(IFileSystem fileSystem, string rootPath)
+    public void Save(IFileSystem fileSystem, string rootPath, XmlDocumentSyntaxFormatter xmlDocumentSyntaxFormatter)
     {
         fileSystem.ThrowIfNull();
 
-        fileSystem.EnsureDirectoryExists(fileSystem.Path.Combine(rootPath, ProjectName));
-        string csprojPath = fileSystem.Path.Combine(rootPath, ProjectName, $"{ProjectName}.csproj");
-        fileSystem.File.WriteAllText(csprojPath, _projectFileContent);
+        string csprojDirectoryPath = fileSystem.Path.Combine(rootPath, ProjectName);
+        string csprojPath = fileSystem.Path.Combine(csprojDirectoryPath, $"{ProjectName}.csproj");
 
-        foreach (var solutionFileInfo in _files)
+        fileSystem.EnsureDirectoryExists(csprojDirectoryPath);
+        string csprojContent = _projectFile.ToXmlString(xmlDocumentSyntaxFormatter);
+        fileSystem.File.WriteAllText(csprojPath, csprojContent);
+
+        foreach (SolutionFileInfoElement? solutionFileInfo in _files)
         {
-            string[] fileFullPathParts = [rootPath, ProjectName, .. solutionFileInfo.Path];
+            string[] fileFullPathParts = [csprojDirectoryPath, .. solutionFileInfo.Path];
             string fileFullPath = fileSystem.Path.Combine(fileFullPathParts);
             IFileInfo fileInfo = fileSystem.FileInfo.New(fileFullPath);
             fileSystem.EnsureContainingDirectoryExists(fileInfo);

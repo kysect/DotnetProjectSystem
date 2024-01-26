@@ -1,5 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
-using Kysect.DotnetProjectSystem.Generating;
+using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
@@ -39,7 +39,7 @@ public class SolutionFileStructureBuilder
     {
         fileSystem.ThrowIfNull();
 
-        string solutionFileContent = CreateSolutionFileContent(fileSystem);
+        string solutionFileContent = CreateSolutionFile(fileSystem);
         fileSystem.File.WriteAllText(fileSystem.Path.Combine(rootPath, $"{_solutionName}.sln"), solutionFileContent);
 
         foreach (var solutionFileInfo in _files)
@@ -49,19 +49,7 @@ public class SolutionFileStructureBuilder
         }
 
         foreach (ProjectFileStructureBuilder projectBuilder in _projects)
-            projectBuilder.Save(fileSystem, rootPath);
-    }
-
-    private string CreateSolutionFileContent(IFileSystem fileSystem)
-    {
-        fileSystem.ThrowIfNull();
-
-        var solutionFileStringBuilder = new SolutionFileStringBuilder();
-
-        foreach (ProjectFileStructureBuilder projectBuilder in _projects)
-            solutionFileStringBuilder.AddProject(projectBuilder.ProjectName, fileSystem.Path.Combine(projectBuilder.ProjectName, $"{projectBuilder.ProjectName}.csproj"));
-
-        return solutionFileStringBuilder.Build();
+            projectBuilder.Save(fileSystem, rootPath, new XmlDocumentSyntaxFormatter());
     }
 
     public string CreateSolutionFile(IFileSystem fileSystem)

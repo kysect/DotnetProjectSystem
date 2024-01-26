@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Kysect.DotnetProjectSystem.Generating;
+namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
 
 public class SolutionFileStringBuilder
 {
