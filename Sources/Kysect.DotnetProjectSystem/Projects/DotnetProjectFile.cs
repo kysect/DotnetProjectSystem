@@ -88,12 +88,13 @@ public class DotnetProjectFile
         if (propertyGroupNode is not null)
             return propertyGroupNode;
 
+        propertyGroupNode = ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup);
         IXmlElementSyntax changedProjectNode = projectNode
             .AsSyntaxElement
-            .AddChild(ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup));
+            .AddChild(propertyGroupNode);
 
         _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
-        return changedProjectNode;
+        return propertyGroupNode;
     }
 
     public bool IsSdkFormat()
