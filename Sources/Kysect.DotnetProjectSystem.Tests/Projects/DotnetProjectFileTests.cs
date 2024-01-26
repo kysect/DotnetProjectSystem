@@ -116,6 +116,24 @@ public class DotnetProjectFileTests
     }
 
     [Fact]
+    public void GetOrAddItemGroup_ForEmptyString_ReturnStringWithItemGroup()
+    {
+        string expected = """
+                          <Project>
+                            <ItemGroup>
+                            </ItemGroup>
+                          </Project>
+                          """;
+
+        var sut = DotnetProjectFile.Create(expected);
+        var propertyGroupNode = sut.GetOrAddItemGroup();
+        var actual = sut.ToXmlString(_formatter);
+
+        actual.Should().Be(expected);
+        propertyGroupNode.Name.Should().Be("ItemGroup");
+    }
+
+    [Fact]
     public void IsSdkFormat_ForEmptyFile_ReturnTrue()
     {
         string projectContent = """

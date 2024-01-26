@@ -79,16 +79,28 @@ public class DotnetProjectFile
 
     public IXmlElementSyntax GetOrAddPropertyGroup()
     {
+        return GetOrAddProjectChild(DotnetProjectFileConstant.PropertyGroup);
+    }
+
+    public IXmlElementSyntax GetOrAddItemGroup()
+    {
+        return GetOrAddProjectChild(DotnetProjectFileConstant.ItemGroup);
+    }
+
+    public IXmlElementSyntax GetOrAddProjectChild(string elementName)
+    {
+        elementName.ThrowIfNull();
+
         IXmlElement projectNode = GetProjectNode();
         IXmlElementSyntax? propertyGroupNode = projectNode
             .AsSyntaxElement
             .Descendants()
-            .FirstOrDefault(s => s.Name == DotnetProjectFileConstant.PropertyGroup);
+            .FirstOrDefault(s => s.Name == elementName);
 
         if (propertyGroupNode is not null)
             return propertyGroupNode;
 
-        propertyGroupNode = ExtendedSyntaxFactory.XmlElement(DotnetProjectFileConstant.PropertyGroup);
+        propertyGroupNode = ExtendedSyntaxFactory.XmlElement(elementName);
         IXmlElementSyntax changedProjectNode = projectNode
             .AsSyntaxElement
             .AddChild(propertyGroupNode);
