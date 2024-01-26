@@ -1,4 +1,5 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
+using Kysect.DotnetProjectSystem.Tests.Asserts;
 using System.IO.Abstractions.TestingHelpers;
 
 namespace Kysect.DotnetProjectSystem.Tests.FileStructureBuilding;
@@ -7,11 +8,13 @@ public class SolutionFileStructureBuilderTests
 {
     private readonly string _rootPath;
     private readonly MockFileSystem _fileSystem;
+    private readonly FileSystemAsserts _asserts;
 
     public SolutionFileStructureBuilderTests()
     {
         _fileSystem = new MockFileSystem();
         _rootPath = _fileSystem.Path.GetFullPath(".");
+        _asserts = new FileSystemAsserts(_fileSystem);
     }
 
     [Fact]
@@ -22,8 +25,9 @@ public class SolutionFileStructureBuilderTests
         new SolutionFileStructureBuilder(solutionName)
             .Save(_fileSystem, _rootPath);
 
-        var expectedSolutionPath = _fileSystem.Path.Combine(_rootPath, $"{solutionName}.sln");
-        _fileSystem.File.Exists(expectedSolutionPath).Should().BeTrue();
+        _asserts
+            .File(_rootPath, $"{solutionName}.sln")
+            .ShouldExists();
     }
 
     [Fact]
@@ -37,11 +41,14 @@ public class SolutionFileStructureBuilderTests
             .AddFile([directoryBuildProps], content)
             .Save(_fileSystem, _rootPath);
 
-        var expectedSolutionPath = _fileSystem.Path.Combine(_rootPath, $"{solutionName}.sln");
-        var expectedDirectoryBuildPropsPath = _fileSystem.Path.Combine(_rootPath, directoryBuildProps);
-        _fileSystem.File.Exists(expectedSolutionPath).Should().BeTrue();
-        _fileSystem.File.Exists(expectedDirectoryBuildPropsPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(expectedDirectoryBuildPropsPath).Should().BeEquivalentTo(content);
+        _asserts
+            .File(_rootPath, $"{solutionName}.sln")
+            .ShouldExists();
+
+        _asserts
+            .File(_rootPath, directoryBuildProps)
+            .ShouldExists()
+            .ShouldHaveContent(content);
     }
 
     [Fact]
@@ -55,11 +62,13 @@ public class SolutionFileStructureBuilderTests
             .AddProject(new ProjectFileStructureBuilder(projectName, content))
             .Save(_fileSystem, _rootPath);
 
-        var expectedSolutionPath = _fileSystem.Path.Combine(_rootPath, $"{solutionName}.sln");
-        var expectedProjectPath = _fileSystem.Path.Combine(_rootPath, "Project", $"{projectName}.csproj");
+        _asserts
+            .File(_rootPath, $"{solutionName}.sln")
+            .ShouldExists();
 
-        _fileSystem.File.Exists(expectedSolutionPath).Should().BeTrue();
-        _fileSystem.File.Exists(expectedProjectPath).Should().BeTrue();
-        _fileSystem.File.ReadAllText(expectedProjectPath).Should().BeEquivalentTo(content);
+        _asserts
+            .File(_rootPath, "Project", $"{projectName}.csproj")
+            .ShouldExists()
+            .ShouldHaveContent(content);
     }
 }
