@@ -2,6 +2,7 @@
 using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Traversing;
+using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
 using System.IO.Abstractions.TestingHelpers;
 
@@ -12,6 +13,7 @@ public class DotnetSolutionSourceFileFinderTests
     private readonly DotnetSolutionParser _solutionStructureParser;
     private readonly DotnetSolutionSourceFileFinder _sourceFileFinder;
     private readonly MockFileSystem _fileSystem;
+    private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
 
     public DotnetSolutionSourceFileFinderTests()
     {
@@ -20,6 +22,7 @@ public class DotnetSolutionSourceFileFinderTests
         _fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
         _solutionStructureParser = new DotnetSolutionParser(_fileSystem, logger);
         _sourceFileFinder = new DotnetSolutionSourceFileFinder(_fileSystem, logger);
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
     }
 
     [Fact]
@@ -53,7 +56,7 @@ public class DotnetSolutionSourceFileFinderTests
                     .AddEmptyFile("File1.cs")
                     .AddEmptyFile("InnerDirectory", "File2.cs"));
 
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 
@@ -93,7 +96,7 @@ public class DotnetSolutionSourceFileFinderTests
                     .AddEmptyFile("bin", "Bin.cs")
                     .AddEmptyFile("obj", "Obj.cs"));
 
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 
@@ -134,7 +137,7 @@ public class DotnetSolutionSourceFileFinderTests
                     .AddEmptyFile("File1.cs")
                     .AddEmptyFile("File2.cs"));
 
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 

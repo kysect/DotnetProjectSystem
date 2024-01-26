@@ -6,7 +6,12 @@ namespace Kysect.DotnetProjectSystem.Tests.Projects;
 
 public class DotnetProjectFileTests
 {
-    private readonly XmlDocumentSyntaxFormatter _formatter = new XmlDocumentSyntaxFormatter();
+    private readonly XmlDocumentSyntaxFormatter _formatter;
+
+    public DotnetProjectFileTests()
+    {
+        _formatter = new XmlDocumentSyntaxFormatter();
+    }
 
     [Fact]
     public void CreateEmpty_ReturnXmlWithProjectNode()

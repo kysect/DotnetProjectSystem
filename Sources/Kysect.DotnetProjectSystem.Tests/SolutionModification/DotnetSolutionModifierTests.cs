@@ -13,12 +13,14 @@ public class DotnetSolutionModifierTests
 {
     private readonly MockFileSystem _fileSystem;
     private readonly ILogger _logger;
+    private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
 
     public DotnetSolutionModifierTests()
     {
         _logger = DefaultLoggerConfiguration.CreateConsoleLogger();
         _fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
 
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
     }
 
     [Fact]
@@ -41,9 +43,9 @@ public class DotnetSolutionModifierTests
 
         var solutionBuilder = new SolutionFileStructureBuilder("Solution")
             .AddProject(new ProjectFileStructureBuilder(projectName, projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
 
-        var solutionModifier = DotnetSolutionModifier.Create(solutionPath, _fileSystem, _logger, new SolutionFileContentParser(), new XmlDocumentSyntaxFormatter());
+        var solutionModifier = DotnetSolutionModifier.Create(solutionPath, _fileSystem, _logger, new SolutionFileContentParser());
 
         solutionModifier.Projects.Single().Path.Should().Be(_fileSystem.Path.Combine(currentPath, projectName, $"{projectName}.csproj"));
     }
@@ -71,10 +73,10 @@ public class DotnetSolutionModifierTests
         var solutionBuilder = new SolutionFileStructureBuilder("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject", projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
 
-        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser(), new XmlDocumentSyntaxFormatter());
-        solutionModifier.Save();
+        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser());
+        solutionModifier.Save(_syntaxFormatter);
     }
 
     [Fact]
@@ -100,14 +102,14 @@ public class DotnetSolutionModifierTests
         var solutionBuilder = new SolutionFileStructureBuilder("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject", projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath);
+        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
 
-        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser(), new XmlDocumentSyntaxFormatter());
+        var solutionModifier = DotnetSolutionModifier.Create("Solution.sln", _fileSystem, _logger, new SolutionFileContentParser());
 
         foreach (DotnetProjectModifier solutionModifierProject in solutionModifier.Projects)
             solutionModifierProject.Accessor.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
 
-        solutionModifier.Save();
+        solutionModifier.Save(_syntaxFormatter);
 
         string fullPathToProjectFile = Path.Combine(@"SampleProject", "SampleProject.csproj");
         _fileSystem.File.ReadAllText(fullPathToProjectFile).Should().Be(expectedProjectContent);
