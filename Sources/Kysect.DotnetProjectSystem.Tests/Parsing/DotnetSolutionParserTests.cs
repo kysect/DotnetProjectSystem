@@ -2,6 +2,7 @@
 using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
@@ -15,8 +16,8 @@ public class DotnetSolutionParserTests
     private readonly DotnetSolutionParser _solutionStructureParser;
 
     private readonly string _currentPath;
-    private readonly XmlDocumentSyntaxFormatter _xmlDocumentSyntaxFormatter;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
+    private readonly DotnetSolutionDescriptorAsserts _solutionDescriptorAsserts;
 
     public DotnetSolutionParserTests()
     {
@@ -27,7 +28,7 @@ public class DotnetSolutionParserTests
 
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
-        _xmlDocumentSyntaxFormatter = _syntaxFormatter;
+        _solutionDescriptorAsserts = new DotnetSolutionDescriptorAsserts(_syntaxFormatter);
     }
 
     [Fact]
@@ -73,6 +74,9 @@ public class DotnetSolutionParserTests
         string projectName = "ProjectName";
         string projectPath = _fileSystem.Path.Combine(_currentPath, projectName, $"{projectName}.csproj");
         string solutionFilePath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
+        var expected = new DotnetSolutionDescriptor(
+            solutionFilePath,
+            new Dictionary<string, DotnetProjectFile> { { projectPath, DotnetProjectFile.Create(projectContent) } });
 
         new SolutionFileStructureBuilder(solutionName)
             .AddProject(
@@ -81,10 +85,7 @@ public class DotnetSolutionParserTests
             .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         DotnetSolutionDescriptor solutionDescriptor = _solutionStructureParser.Parse(solutionFilePath);
-        solutionDescriptor.Projects.Should().HaveCount(1);
 
-        (string? actualProjectPath, DotnetProjectFile? actualProjectContent) = solutionDescriptor.Projects.Single();
-        actualProjectPath.Should().Be(projectPath);
-        actualProjectContent.ToXmlString(_xmlDocumentSyntaxFormatter).Should().Be(projectContent);
+        _solutionDescriptorAsserts.Equals(solutionDescriptor, expected);
     }
 }
