@@ -1,5 +1,6 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.DotnetProjectSystem.Tools;
+using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Projects;
@@ -36,5 +37,16 @@ public class DirectoryPackagesPropsFile
         }
 
         return result;
+    }
+
+    public void AddPackageVersion(string name, string version)
+    {
+        IXmlElementSyntax itemGroup = File.GetOrAddItemGroup();
+        IXmlElementSyntax packageReference = ExtendedSyntaxFactory
+            .XmlEmptyElement(DotnetProjectFileConstant.PackageVersion)
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name))
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Version", version));
+
+        File.AddChildAndUpdateDocument(itemGroup, packageReference);
     }
 }

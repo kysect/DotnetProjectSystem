@@ -1,4 +1,5 @@
-﻿using Kysect.DotnetProjectSystem.Tools;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
 
@@ -74,5 +75,33 @@ public class DotnetProjectFilePackageReferences
         }
 
         _projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
+    }
+
+    public void UpdatePackageReference(string name, string? version)
+    {
+        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        {
+            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
+            if (nameAttribute is null)
+                continue;
+
+            if (nameAttribute.Value != name)
+                continue;
+
+            XmlAttributeSyntax versionAttribute = xmlElementSyntax.GetAttribute("Version").ThrowIfNull();
+
+            if (version is null)
+            {
+                IXmlElementSyntax changedElement = xmlElementSyntax.RemoveAttribute(versionAttribute);
+                _projectFile.UpdateDocument(d => d.ReplaceNode(xmlElementSyntax.AsNode, changedElement.AsNode));
+            }
+            else
+            {
+                XmlAttributeSyntax? changedVersionAttribute = versionAttribute.WithValue(ExtendedSyntaxFactory.XmlString(version));
+                _projectFile.UpdateDocument(d => d.ReplaceNode(versionAttribute, changedVersionAttribute));
+            }
+
+            return;
+        }
     }
 }
