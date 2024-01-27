@@ -11,11 +11,8 @@ public class SolutionFileContentParser
 
     public IReadOnlyCollection<DotnetProjectFileDescriptor> ParseSolutionFileContent(string solutionContents)
     {
-        return ParseSolutionFileContentInner(solutionContents).ToList();
-    }
+        List<DotnetProjectFileDescriptor> result = new List<DotnetProjectFileDescriptor>();
 
-    private IEnumerable<DotnetProjectFileDescriptor> ParseSolutionFileContentInner(string solutionContents)
-    {
         Match match = ProjectPattern.Match(solutionContents);
 
         while (match.Success)
@@ -36,10 +33,12 @@ public class SolutionFileContentParser
                     throw new DotnetProjectSystemException($"Project type id {projectTypeIdString} is not valid id");
 
                 var project = new DotnetProjectFileDescriptor(projectTypeId, projectName, projectPath, projectId);
-                yield return project;
+                result.Add(project);
             }
 
             match = match.NextMatch();
         }
+
+        return result;
     }
 }

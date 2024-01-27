@@ -36,7 +36,7 @@ public class DotnetSolutionSourceFileFinder
             DotnetProjectFile projectFile = descriptorProject.Value;
 
             IFileInfo projectFileInfo = _fileSystem.FileInfo.New(filePath);
-            if (projectFileInfo.Directory == null)
+            if (projectFileInfo.Directory is null)
                 throw new DotnetProjectSystemException($"Cannot get project directory for {filePath}");
 
             _logger.LogInformation("Adding files from csproj");
