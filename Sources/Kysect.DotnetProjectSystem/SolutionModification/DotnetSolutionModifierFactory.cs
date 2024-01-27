@@ -2,7 +2,6 @@
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tools;
-using Microsoft.Language.Xml;
 using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.SolutionModification;
@@ -82,7 +81,7 @@ public class DotnetSolutionModifierFactory
         return projects;
     }
 
-    public static DotnetProjectFile Create(string path, IFileSystem fileSystem)
+    private static DotnetProjectFile Create(string path, IFileSystem fileSystem)
     {
         path.ThrowIfNull();
         fileSystem.ThrowIfNull();
@@ -92,7 +91,6 @@ public class DotnetSolutionModifierFactory
                 ? fileSystem.File.ReadAllText(path)
                 : string.Empty;
 
-        XmlDocumentSyntax root = Parser.ParseText(csprojContent);
-        return new DotnetProjectFile(root);
+        return DotnetProjectFile.Create(csprojContent);
     }
 }
