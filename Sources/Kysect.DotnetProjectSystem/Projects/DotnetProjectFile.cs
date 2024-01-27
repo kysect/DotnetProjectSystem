@@ -72,6 +72,11 @@ public class DotnetProjectFile
         return _content.Root;
     }
 
+    public IReadOnlyCollection<IXmlElementSyntax> GetNodesByName(string name)
+    {
+        return _content.GetNodesByName(name);
+    }
+
     public IXmlElementSyntax GetOrAddPropertyGroup()
     {
         return GetOrAddProjectChild(DotnetProjectFileConstant.PropertyGroup);
@@ -129,9 +134,9 @@ public class DotnetProjectFile
         return items;
     }
 
-    public IReadOnlyCollection<ProjectPackageReferences> GetPackageReferences()
+    public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
     {
-        var result = new List<ProjectPackageReferences>();
+        var result = new List<ProjectPackageReference>();
 
         foreach (IXmlElementSyntax xmlElementSyntax in _content.GetNodesByName(DotnetProjectFileConstant.PackageReference))
         {
@@ -142,9 +147,9 @@ public class DotnetProjectFile
                 continue;
 
             if (versionAttribute is null)
-                result.Add(new ProjectPackageReferences(nameAttribute.Value, Version: null));
+                result.Add(new ProjectPackageReference(nameAttribute.Value, Version: null));
             else
-                result.Add(new ProjectPackageReferences(nameAttribute.Value, versionAttribute.Value));
+                result.Add(new ProjectPackageReference(nameAttribute.Value, versionAttribute.Value));
         }
 
         return result;

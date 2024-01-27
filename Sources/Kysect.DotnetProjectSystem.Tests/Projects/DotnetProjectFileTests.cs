@@ -281,9 +281,9 @@ public class DotnetProjectFileTests
                              </Project>
                              """;
 
-        IReadOnlyCollection<ProjectPackageReferences> expected = [new ProjectPackageReferences("PackageName", null)];
+        IReadOnlyCollection<ProjectPackageReference> expected = [new ProjectPackageReference("PackageName", null)];
 
-        IReadOnlyCollection<ProjectPackageReferences> references = DotnetProjectFile
+        IReadOnlyCollection<ProjectPackageReference> references = DotnetProjectFile
             .Create(input)
             .GetPackageReferences();
 
@@ -301,9 +301,9 @@ public class DotnetProjectFileTests
                              </Project>
                              """;
 
-        IReadOnlyCollection<ProjectPackageReferences> expected = [new ProjectPackageReferences("PackageName", "1.0.0")];
+        IReadOnlyCollection<ProjectPackageReference> expected = [new ProjectPackageReference("PackageName", "1.0.0")];
 
-        IReadOnlyCollection<ProjectPackageReferences> references = DotnetProjectFile
+        IReadOnlyCollection<ProjectPackageReference> references = DotnetProjectFile
             .Create(input)
             .GetPackageReferences();
 
