@@ -10,6 +10,8 @@ public class DotnetProjectFile
 {
     private XmlDocumentSyntax _content;
 
+    public DotnetProjectFilePackageReferences PackageReferences { get; }
+
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
         content.ThrowIfNull();
@@ -19,6 +21,7 @@ public class DotnetProjectFile
             throw new ArgumentException("XML root must be Project");
 
         _content = content;
+        PackageReferences = new DotnetProjectFilePackageReferences(this);
     }
 
     public static DotnetProjectFile CreateEmpty()
@@ -166,27 +169,6 @@ public class DotnetProjectFile
         return dotnetProjectProperty.Value;
     }
 
-    public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
-    {
-        var result = new List<ProjectPackageReference>();
-
-        foreach (IXmlElementSyntax xmlElementSyntax in _content.GetNodesByName(DotnetProjectFileConstant.PackageReference))
-        {
-            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
-            XmlAttributeSyntax? versionAttribute = xmlElementSyntax.GetAttribute("Version");
-
-            if (nameAttribute is null)
-                continue;
-
-            if (versionAttribute is null)
-                result.Add(new ProjectPackageReference(nameAttribute.Value, Version: null));
-            else
-                result.Add(new ProjectPackageReference(nameAttribute.Value, versionAttribute.Value));
-        }
-
-        return result;
-    }
-
     public DotnetProjectFile AddCompileItem(string value)
     {
         return AddItem("Compile", value);
@@ -235,29 +217,6 @@ public class DotnetProjectFile
         return this;
     }
 
-    public DotnetProjectFile AddPackageReference(string name)
-    {
-        IXmlElementSyntax itemGroup = GetOrAddItemGroup();
-        IXmlElementSyntax packageReference = ExtendedSyntaxFactory
-            .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
-            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name));
-
-        AddChildAndUpdateDocument(itemGroup, packageReference);
-        return this;
-    }
-
-    public DotnetProjectFile AddPackageReference(string name, string version)
-    {
-        IXmlElementSyntax itemGroup = GetOrAddItemGroup();
-        IXmlElementSyntax packageReference = ExtendedSyntaxFactory
-            .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
-            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name))
-            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Version", version));
-
-        AddChildAndUpdateDocument(itemGroup, packageReference);
-        return this;
-    }
-
     public string ToXmlString(XmlDocumentSyntaxFormatter formatter)
     {
         formatter.ThrowIfNull();
@@ -265,7 +224,7 @@ public class DotnetProjectFile
         return formatter.Format(_content).ToFullString();
     }
 
-    private void AddChildAndUpdateDocument(IXmlElementSyntax parent, IXmlElementSyntax newChild)
+    internal void AddChildAndUpdateDocument(IXmlElementSyntax parent, IXmlElementSyntax newChild)
     {
         IXmlElementSyntax modifiedParent = parent.AddChild(newChild);
         _content = _content.ReplaceNode(parent.AsNode, modifiedParent.AsNode);
