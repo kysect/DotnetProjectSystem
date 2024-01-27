@@ -11,6 +11,6 @@ public class DirectoryBuildPropsFile
 
     public bool ArtifactsOutputEnabled()
     {
-        return File.FindBooleanProperty("UseArtifactsOutput") ?? false;
+        return File.Properties.FindBooleanProperty("UseArtifactsOutput") ?? false;
     }
 }

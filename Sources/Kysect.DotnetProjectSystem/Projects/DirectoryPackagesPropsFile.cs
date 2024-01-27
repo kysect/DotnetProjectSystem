@@ -1,4 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Tools;
 using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Projects;
@@ -14,12 +15,12 @@ public class DirectoryPackagesPropsFile
 
     public bool GetCentralPackageManagement()
     {
-        return File.FindBooleanProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally) ?? false;
+        return File.Properties.FindBooleanProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally) ?? false;
     }
 
     public void SetCentralPackageManagement(bool enabled)
     {
-        File.AddOrUpdateProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally, enabled.ToString());
+        File.Properties.SetProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally, enabled);
     }
 
     public IReadOnlyCollection<ProjectPackageVersion> GetPackageVersions()

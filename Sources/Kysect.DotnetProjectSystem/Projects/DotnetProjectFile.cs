@@ -11,6 +11,7 @@ public class DotnetProjectFile
     private XmlDocumentSyntax _content;
 
     public DotnetProjectFilePackageReferences PackageReferences { get; }
+    public DotnetProjectFileProperties Properties { get; }
 
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
@@ -22,6 +23,7 @@ public class DotnetProjectFile
 
         _content = content;
         PackageReferences = new DotnetProjectFilePackageReferences(this);
+        Properties = new DotnetProjectFileProperties(this);
     }
 
     public static DotnetProjectFile CreateEmpty()
@@ -138,37 +140,6 @@ public class DotnetProjectFile
         return items;
     }
 
-    public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
-    {
-        return _content
-            .GetNodesByName(property)
-            .Select(xmlElementSyntax => new DotnetProjectProperty(property, xmlElementSyntax.Content.ToFullString()))
-            .ToList();
-    }
-
-    public DotnetProjectProperty? FindProperty(string property)
-    {
-        IReadOnlyCollection<DotnetProjectProperty> properties = GetProperties(property);
-
-        if (properties.Count > 1)
-            throw new DotnetProjectSystemException($"Duplicated property {property}");
-
-        if (properties.Count == 0)
-            return null;
-
-        return properties.Single();
-    }
-
-    public DotnetProjectProperty GetProperty(string property)
-    {
-        DotnetProjectProperty? dotnetProjectProperty = FindProperty(property);
-
-        if (dotnetProjectProperty is null)
-            throw new DotnetProjectSystemException($"Property {property} missed");
-
-        return dotnetProjectProperty.Value;
-    }
-
     public DotnetProjectFile AddCompileItem(string value)
     {
         return AddItem("Compile", value);
@@ -187,33 +158,6 @@ public class DotnetProjectFile
         IXmlElementSyntax modifiedItemGroup = itemGroup.AddChild(itemSyntax);
 
         _content = _content.ReplaceNode(itemGroup.AsNode, modifiedItemGroup.AsNode);
-        return this;
-    }
-
-    public DotnetProjectFile AddOrUpdateProperty(string name, string value)
-    {
-        IReadOnlyCollection<IXmlElementSyntax> properties = _content.GetNodesByName(name);
-        if (properties.Count == 0)
-            return AddProperty(name, value);
-
-        if (properties.Count > 1)
-            throw new DotnetProjectSystemException("Cannot update property. File contains multiple declarations");
-
-        IXmlElementSyntax elementSyntax = properties.Single();
-        IXmlElementSyntax changedElement = elementSyntax.WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));
-
-        _content = _content.ReplaceNode(elementSyntax.AsNode, changedElement.AsNode);
-        return this;
-    }
-
-    public DotnetProjectFile AddProperty(string name, string value)
-    {
-        IXmlElementSyntax propertyGroup = GetOrAddPropertyGroup();
-        XmlElementSyntax propertyElement = ExtendedSyntaxFactory
-            .XmlEmptyElement(name)
-            .WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));
-
-        AddChildAndUpdateDocument(propertyGroup, propertyElement);
         return this;
     }
 

@@ -45,7 +45,7 @@ public class DotnetSolutionSourceFileFinder
                 .Select(p => _fileSystem.Path.Combine(projectFileInfo.Directory.FullName, p.Include))
                 .ToList();
 
-            if (projectFile.IsEnableDefaultItems())
+            if (projectFile.Properties.IsEnableDefaultItems())
             {
                 string binDirectoryPath = _fileSystem.Path.Combine(projectFileInfo.Directory.FullName, "bin");
                 string objDirectoryPath = _fileSystem.Path.Combine(projectFileInfo.Directory.FullName, "obj");
