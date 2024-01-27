@@ -25,7 +25,7 @@ public class DotnetSolutionModifierFactory
 
         DirectoryBuildPropsFile? directoryBuildPropsModifier = TryCreateDirectoryBuildPropsFile(solutionFileInfo);
         DirectoryPackagesPropsFile? directoryPackagesPropsFile = TryCreateDirectoryPackagesPropsFile(solutionFileInfo);
-        Dictionary<string, DotnetProjectModifier> projects = CreateProjectModifiers(solutionFileInfo);
+        Dictionary<string, DotnetCsprojFile> projects = CreateProjectModifiers(solutionFileInfo);
 
         return new DotnetSolutionModifier(
             projects,
@@ -59,14 +59,14 @@ public class DotnetSolutionModifierFactory
         return new DirectoryPackagesPropsFile(dotnetProjectFile);
     }
 
-    private Dictionary<string, DotnetProjectModifier> CreateProjectModifiers(IFileInfo solutionFileInfo)
+    private Dictionary<string, DotnetCsprojFile> CreateProjectModifiers(IFileInfo solutionFileInfo)
     {
         solutionFileInfo.Directory.ThrowIfNull();
 
         string solutionFileContent = _fileSystem.File.ReadAllText(solutionFileInfo.FullName);
         IReadOnlyCollection<DotnetProjectFileDescriptor> projectFileDescriptors = _solutionFileParser.ParseSolutionFileContent(solutionFileContent);
 
-        var projects = new Dictionary<string, DotnetProjectModifier>();
+        var projects = new Dictionary<string, DotnetCsprojFile>();
         foreach (DotnetProjectFileDescriptor projectFileDescriptor in projectFileDescriptors)
         {
             string projectFullPath = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, projectFileDescriptor.ProjectPath);
@@ -74,7 +74,7 @@ public class DotnetSolutionModifierFactory
                 throw new DotnetProjectSystemException($"Project file with path {projectFullPath} was not found");
 
             var dotnetProjectFile = Create(projectFullPath, _fileSystem);
-            var projectModifier = new DotnetProjectModifier(dotnetProjectFile);
+            var projectModifier = new DotnetCsprojFile(dotnetProjectFile);
             projects.Add(projectFullPath, projectModifier);
         }
 

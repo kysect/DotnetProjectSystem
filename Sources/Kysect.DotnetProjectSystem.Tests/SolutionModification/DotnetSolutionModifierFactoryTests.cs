@@ -58,8 +58,8 @@ public class DotnetSolutionModifierFactoryTests
                                             """;
 
         new SolutionFileStructureBuilder("Solution")
-            .AddFile([SolutionItemNameConstants.DirectoryBuildProps], directoryBuildPropsContent)
-            .AddFile([SolutionItemNameConstants.DirectoryPackagesProps], directoryPackagesPropsContent)
+            .AddDirectoryBuildProps(directoryBuildPropsContent)
+            .AddDirectoryPackagesProps(directoryPackagesPropsContent)
             .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");

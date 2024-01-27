@@ -12,9 +12,9 @@ public class DotnetSolutionModifier
     private readonly IFileSystem _fileSystem;
     private DirectoryBuildPropsFile? _directoryBuildPropsModifier;
     private DirectoryPackagesPropsFile? _directoryPackagePropsModifier;
-    private readonly Dictionary<string, DotnetProjectModifier> _projects;
+    private readonly Dictionary<string, DotnetCsprojFile> _projects;
 
-    public IReadOnlyCollection<DotnetProjectModifier> Projects => _projects.Values;
+    public IReadOnlyCollection<DotnetCsprojFile> Projects => _projects.Values;
 
     public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
     {
@@ -29,7 +29,7 @@ public class DotnetSolutionModifier
     }
 
     public DotnetSolutionModifier(
-        Dictionary<string, DotnetProjectModifier> projects,
+        Dictionary<string, DotnetCsprojFile> projects,
         DirectoryBuildPropsFile? directoryBuildPropsModifier,
         DirectoryPackagesPropsFile? directoryPackagePropsModifier,
         IFileSystem fileSystem,
@@ -58,7 +58,7 @@ public class DotnetSolutionModifier
             _fileSystem.File.WriteAllText(directoryPackagesPropsPath, _directoryPackagePropsModifier.File.ToXmlString(syntaxFormatter));
         }
 
-        foreach (KeyValuePair<string, DotnetProjectModifier> projectModifier in _projects)
+        foreach (KeyValuePair<string, DotnetCsprojFile> projectModifier in _projects)
         {
             _fileSystem.File.WriteAllText(projectModifier.Key, projectModifier.Value.File.ToXmlString(syntaxFormatter));
         }
