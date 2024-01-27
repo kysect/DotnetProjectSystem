@@ -209,16 +209,12 @@ public class DotnetProjectFile
 
     public DotnetProjectFile AddOrUpdateProperty(string name, string value)
     {
-        DotnetProjectProperty? property = FindProperty(name);
-        if (property is null)
+        IReadOnlyCollection<IXmlElementSyntax> properties = _content.GetNodesByName(name);
+        if (properties.Count == 0)
             return AddProperty(name, value);
 
-        IReadOnlyCollection<IXmlElementSyntax> properties = _content.GetNodesByName(name);
         if (properties.Count > 1)
             throw new DotnetProjectSystemException("Cannot update property. File contains multiple declarations");
-
-        if (properties.Count == 0)
-            throw new DotnetProjectSystemException($"Cannot find property {name} in file.");
 
         IXmlElementSyntax elementSyntax = properties.Single();
         IXmlElementSyntax changedElement = elementSyntax.WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));

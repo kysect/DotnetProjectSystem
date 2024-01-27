@@ -333,6 +333,25 @@ public class DotnetProjectFileTests
     }
 
     [Fact]
+    public void AddOrUpdateProperty_ProjectWithMultiplePropertyDeclaration_ThrowException()
+    {
+        const string input = """
+                             <Project>
+                               <PropertyGroup>
+                                 <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+                                 <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+                               </PropertyGroup>
+                             </Project>
+                             """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile.Create(input);
+        Assert.Throws<DotnetProjectSystemException>(() =>
+        {
+            projectFile.AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
+        });
+    }
+
+    [Fact]
     public void GetPackageReferences_PackageWithoutVersion_ReturnExpectedResult()
     {
         const string input = """
