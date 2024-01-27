@@ -8,4 +8,9 @@ public class DirectoryBuildPropsFile
     {
         File = file;
     }
+
+    public bool ArtifactsOutputEnabled()
+    {
+        return File.FindBooleanProperty("UseArtifactsOutput") ?? false;
+    }
 }
