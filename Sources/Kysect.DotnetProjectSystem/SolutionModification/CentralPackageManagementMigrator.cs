@@ -88,8 +88,11 @@ public class CentralPackageManagementMigrator
             }
 
             _logger.LogWarning("Nuget {Package} added to projects with different versions: {Versions}", nugetVersions.Key, versions.ToSingleString());
-            string selectedVersion = versions.First();
-            distinctPackages.Add(new ProjectPackageVersion(nugetVersions.Key, selectedVersion));
+            Version lastVersion = versions
+                .Select(Version.Parse)
+                .Max();
+
+            distinctPackages.Add(new ProjectPackageVersion(nugetVersions.Key, lastVersion.ToString()));
         }
 
         return distinctPackages

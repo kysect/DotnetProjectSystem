@@ -14,7 +14,7 @@ public class DotnetProjectFilePackageReferences
         _projectFile = projectFile;
     }
 
-    public DotnetProjectFilePackageReferences AddPackageReference(string name)
+    public DotnetProjectFile AddPackageReference(string name)
     {
         IXmlElementSyntax itemGroup = _projectFile.GetOrAddItemGroup();
         IXmlElementSyntax packageReference = ExtendedSyntaxFactory
@@ -22,10 +22,10 @@ public class DotnetProjectFilePackageReferences
             .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name));
 
         _projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
-        return this;
+        return _projectFile;
     }
 
-    public DotnetProjectFilePackageReferences AddPackageReference(string name, string version)
+    public DotnetProjectFile AddPackageReference(string name, string version)
     {
         IXmlElementSyntax itemGroup = _projectFile.GetOrAddItemGroup();
         IXmlElementSyntax packageReference = ExtendedSyntaxFactory
@@ -34,7 +34,7 @@ public class DotnetProjectFilePackageReferences
             .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Version", version));
 
         _projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
-        return this;
+        return _projectFile;
     }
 
     public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
