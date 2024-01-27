@@ -269,4 +269,44 @@ public class DotnetProjectFileTests
 
         projectFile.ToXmlString(_formatter).Should().Be(expected);
     }
+
+    [Fact]
+    public void GetPackageReferences_PackageWithoutVersion_ReturnExpectedResult()
+    {
+        const string input = """
+                             <Project>
+                               <ItemGroup>
+                                 <PackageReference Include="PackageName">
+                               </ItemGroup>
+                             </Project>
+                             """;
+
+        IReadOnlyCollection<ProjectPackageReferences> expected = [new ProjectPackageReferences("PackageName", null)];
+
+        IReadOnlyCollection<ProjectPackageReferences> references = DotnetProjectFile
+            .Create(input)
+            .GetPackageReferences();
+
+        references.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void GetPackageReferences_PackageWithVersion_ReturnExpectedResult()
+    {
+        const string input = """
+                             <Project>
+                               <ItemGroup>
+                                 <PackageReference Include="PackageName" Version="1.0.0">
+                               </ItemGroup>
+                             </Project>
+                             """;
+
+        IReadOnlyCollection<ProjectPackageReferences> expected = [new ProjectPackageReferences("PackageName", "1.0.0")];
+
+        IReadOnlyCollection<ProjectPackageReferences> references = DotnetProjectFile
+            .Create(input)
+            .GetPackageReferences();
+
+        references.Should().BeEquivalentTo(expected);
+    }
 }
