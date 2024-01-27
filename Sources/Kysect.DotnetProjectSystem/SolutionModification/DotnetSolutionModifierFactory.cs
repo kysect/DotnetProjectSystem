@@ -1,6 +1,7 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
+using Microsoft.Language.Xml;
 using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.SolutionModification;
@@ -37,7 +38,7 @@ public class DotnetSolutionModifierFactory
         if (!_fileSystem.File.Exists(path))
             return null;
 
-        var dotnetProjectFile = DotnetProjectFile.Create(path, _fileSystem);
+        var dotnetProjectFile = Create(path, _fileSystem);
         return new DotnetPropsModifier(dotnetProjectFile);
     }
 
@@ -55,11 +56,25 @@ public class DotnetSolutionModifierFactory
             if (!_fileSystem.File.Exists(projectFullPath))
                 throw new ArgumentException($"Project file with path {projectFullPath} was not found");
 
-            var dotnetProjectFile = DotnetProjectFile.Create(projectFullPath, _fileSystem);
+            var dotnetProjectFile = Create(projectFullPath, _fileSystem);
             var projectModifier = new DotnetProjectModifier(dotnetProjectFile);
             projects.Add(projectFullPath, projectModifier);
         }
 
         return projects;
+    }
+
+    public static DotnetProjectFile Create(string path, IFileSystem fileSystem)
+    {
+        path.ThrowIfNull();
+        fileSystem.ThrowIfNull();
+
+        string csprojContent =
+            fileSystem.File.Exists(path)
+                ? fileSystem.File.ReadAllText(path)
+                : string.Empty;
+
+        XmlDocumentSyntax root = Parser.ParseText(csprojContent);
+        return new DotnetProjectFile(root);
     }
 }
