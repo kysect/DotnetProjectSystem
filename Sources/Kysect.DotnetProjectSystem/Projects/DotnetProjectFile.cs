@@ -129,6 +129,27 @@ public class DotnetProjectFile
         return items;
     }
 
+    public IReadOnlyCollection<ProjectPackageReferences> GetPackageReferences()
+    {
+        var result = new List<ProjectPackageReferences>();
+
+        foreach (IXmlElementSyntax xmlElementSyntax in _content.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        {
+            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
+            XmlAttributeSyntax? versionAttribute = xmlElementSyntax.GetAttribute("Version");
+
+            if (nameAttribute is null)
+                continue;
+
+            if (versionAttribute is null)
+                result.Add(new ProjectPackageReferences(nameAttribute.Value, Version: null));
+            else
+                result.Add(new ProjectPackageReferences(nameAttribute.Value, versionAttribute.Value));
+        }
+
+        return result;
+    }
+
     public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
     {
         return _content
