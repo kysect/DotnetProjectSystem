@@ -390,4 +390,40 @@ public class DotnetProjectFileTests
 
         references.Should().BeEquivalentTo(expected);
     }
+
+    [Fact]
+    public void AddPackageReference_PackageWithoutVersion_AddRequiredString()
+    {
+        var expected = """
+                       <Project>
+                         <ItemGroup>
+                           <PackageReference Include="PackageName" />
+                         </ItemGroup>
+                       </Project>
+                       """;
+
+        var projectFile = DotnetProjectFile.CreateEmpty();
+
+        projectFile.AddPackageReference("PackageName");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
+    public void AddPackageReference_PackageWithVersion_AddRequiredString()
+    {
+        var expected = """
+                       <Project>
+                         <ItemGroup>
+                           <PackageReference Include="PackageName" Version="1.2.3" />
+                         </ItemGroup>
+                       </Project>
+                       """;
+
+        var projectFile = DotnetProjectFile.CreateEmpty();
+
+        projectFile.AddPackageReference("PackageName", "1.2.3");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
 }

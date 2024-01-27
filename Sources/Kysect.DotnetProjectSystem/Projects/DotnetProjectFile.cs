@@ -92,6 +92,7 @@ public class DotnetProjectFile
         elementName.ThrowIfNull();
 
         IXmlElement projectNode = GetProjectNode();
+        // TODO: add API for returning more than one group
         IXmlElementSyntax? propertyGroupNode = projectNode
             .AsSyntaxElement
             .Descendants()
@@ -134,27 +135,6 @@ public class DotnetProjectFile
         return items;
     }
 
-    public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
-    {
-        var result = new List<ProjectPackageReference>();
-
-        foreach (IXmlElementSyntax xmlElementSyntax in _content.GetNodesByName(DotnetProjectFileConstant.PackageReference))
-        {
-            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
-            XmlAttributeSyntax? versionAttribute = xmlElementSyntax.GetAttribute("Version");
-
-            if (nameAttribute is null)
-                continue;
-
-            if (versionAttribute is null)
-                result.Add(new ProjectPackageReference(nameAttribute.Value, Version: null));
-            else
-                result.Add(new ProjectPackageReference(nameAttribute.Value, versionAttribute.Value));
-        }
-
-        return result;
-    }
-
     public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
     {
         return _content
@@ -184,6 +164,27 @@ public class DotnetProjectFile
             throw new DotnetProjectSystemException($"Property {property} missed");
 
         return dotnetProjectProperty.Value;
+    }
+
+    public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
+    {
+        var result = new List<ProjectPackageReference>();
+
+        foreach (IXmlElementSyntax xmlElementSyntax in _content.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        {
+            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
+            XmlAttributeSyntax? versionAttribute = xmlElementSyntax.GetAttribute("Version");
+
+            if (nameAttribute is null)
+                continue;
+
+            if (versionAttribute is null)
+                result.Add(new ProjectPackageReference(nameAttribute.Value, Version: null));
+            else
+                result.Add(new ProjectPackageReference(nameAttribute.Value, versionAttribute.Value));
+        }
+
+        return result;
     }
 
     public DotnetProjectFile AddCompileItem(string value)
@@ -225,14 +226,35 @@ public class DotnetProjectFile
 
     public DotnetProjectFile AddProperty(string name, string value)
     {
+        IXmlElementSyntax propertyGroup = GetOrAddPropertyGroup();
         XmlElementSyntax propertyElement = ExtendedSyntaxFactory
             .XmlEmptyElement(name)
             .WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));
 
-        IXmlElementSyntax propertyGroup = GetOrAddPropertyGroup();
-        IXmlElementSyntax modifiedItemGroup = propertyGroup.AddChild(propertyElement);
+        AddChildAndUpdateDocument(propertyGroup, propertyElement);
+        return this;
+    }
 
-        _content = _content.ReplaceNode(propertyGroup.AsNode, modifiedItemGroup.AsNode);
+    public DotnetProjectFile AddPackageReference(string name)
+    {
+        IXmlElementSyntax itemGroup = GetOrAddItemGroup();
+        IXmlElementSyntax packageReference = ExtendedSyntaxFactory
+            .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name));
+
+        AddChildAndUpdateDocument(itemGroup, packageReference);
+        return this;
+    }
+
+    public DotnetProjectFile AddPackageReference(string name, string version)
+    {
+        IXmlElementSyntax itemGroup = GetOrAddItemGroup();
+        IXmlElementSyntax packageReference = ExtendedSyntaxFactory
+            .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name))
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Version", version));
+
+        AddChildAndUpdateDocument(itemGroup, packageReference);
         return this;
     }
 
@@ -241,5 +263,11 @@ public class DotnetProjectFile
         formatter.ThrowIfNull();
 
         return formatter.Format(_content).ToFullString();
+    }
+
+    private void AddChildAndUpdateDocument(IXmlElementSyntax parent, IXmlElementSyntax newChild)
+    {
+        IXmlElementSyntax modifiedParent = parent.AddChild(newChild);
+        _content = _content.ReplaceNode(parent.AsNode, modifiedParent.AsNode);
     }
 }
