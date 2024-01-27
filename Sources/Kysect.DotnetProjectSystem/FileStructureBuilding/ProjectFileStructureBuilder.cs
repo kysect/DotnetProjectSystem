@@ -19,9 +19,9 @@ public class ProjectFileStructureBuilder
         _projectFile = DotnetProjectFile.CreateEmpty();
     }
 
-    public ProjectFileStructureBuilder(string projectName, string projectFileContent) : this(projectName)
+    public ProjectFileStructureBuilder(string projectName, string projectFileContent)
+        : this(projectName, DotnetProjectFile.Create(projectFileContent))
     {
-        _projectFile = DotnetProjectFile.Create(projectFileContent);
     }
 
     public ProjectFileStructureBuilder(string projectName, DotnetProjectFile projectFileContent) : this(projectName)
