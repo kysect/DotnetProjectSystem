@@ -1,4 +1,4 @@
-﻿namespace Kysect.DotnetProjectSystem.SolutionModification;
+﻿namespace Kysect.DotnetProjectSystem.Tools;
 
 public static class SolutionItemNameConstants
 {

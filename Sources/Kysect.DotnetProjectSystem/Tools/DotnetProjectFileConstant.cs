@@ -1,4 +1,4 @@
-﻿namespace Kysect.DotnetProjectSystem.Projects;
+﻿namespace Kysect.DotnetProjectSystem.Tools;
 
 public static class DotnetProjectFileConstant
 {

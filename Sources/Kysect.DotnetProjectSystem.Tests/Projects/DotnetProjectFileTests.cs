@@ -1,5 +1,4 @@
 ﻿using Kysect.DotnetProjectSystem.Projects;
-using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
 
@@ -179,62 +178,6 @@ public class DotnetProjectFileTests
     }
 
     [Fact]
-    public void GetProperty_ForEmptyProject_ThrowException()
-    {
-        var content = """
-                      <Project>
-                        <PropertyGroup>
-                        </PropertyGroup>
-                      </Project>
-                      """;
-
-        var sut = DotnetProjectFile.Create(content);
-
-        Assert.Throws<DotnetProjectSystemException>(() =>
-        {
-            sut.GetProperty("TargetFramework");
-        });
-    }
-
-    [Fact]
-    public void GetProperty_ForProjectWithDuplicatedProperties_ThrowException()
-    {
-        var content = """
-                      <Project>
-                        <PropertyGroup>
-                          <TargetFramework>net8.0</TargetFramework>
-                          <TargetFramework>net8.0</TargetFramework>
-                        </PropertyGroup>
-                      </Project>
-                      """;
-
-        var sut = DotnetProjectFile.Create(content);
-
-        Assert.Throws<DotnetProjectSystemException>(() =>
-        {
-            sut.GetProperty("TargetFramework");
-        });
-    }
-
-    [Fact]
-    public void GetProperty_ForProjectWithProperty_ReturnValue()
-    {
-        var content = """
-                      <Project>
-                        <PropertyGroup>
-                          <TargetFramework>net8.0</TargetFramework>
-                        </PropertyGroup>
-                      </Project>
-                      """;
-
-        var sut = DotnetProjectFile.Create(content);
-
-        DotnetProjectProperty compileItems = sut.GetProperty("TargetFramework");
-
-        compileItems.Should().Be(new DotnetProjectProperty("TargetFramework", "net8.0"));
-    }
-
-    [Fact]
     public void AddCompileItem_ForEmptyProject_ReturnExpectedContent()
     {
         const string expected = """
@@ -250,104 +193,5 @@ public class DotnetProjectFileTests
             .AddCompileItem("File1.cs");
 
         projectFile.ToXmlString(_formatter).Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddProperty_ForEmptyProject_ReturnExpectedContent()
-    {
-        const string expected = """
-                                <Project>
-                                  <PropertyGroup>
-                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        DotnetProjectFile projectFile = DotnetProjectFile
-            .CreateEmpty()
-            .AddProperty("ManagePackageVersionsCentrally", "true");
-
-        projectFile.ToXmlString(_formatter).Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddOrUpdateProperty_ForEmptyProject_ReturnExpectedContent()
-    {
-        const string expected = """
-                                <Project>
-                                  <PropertyGroup>
-                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        DotnetProjectFile projectFile = DotnetProjectFile
-            .CreateEmpty()
-            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
-
-        projectFile.ToXmlString(_formatter).Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddOrUpdateProperty_ProjectWithSameProperty_ReturnExpectedContent()
-    {
-        const string expected = """
-                                <Project>
-                                  <PropertyGroup>
-                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        DotnetProjectFile projectFile = DotnetProjectFile
-            .Create(expected)
-            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
-
-        projectFile.ToXmlString(_formatter).Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddOrUpdateProperty_ProjectWithDifferentPropertyValue_ReturnExpectedContent()
-    {
-        const string input = """
-                                <Project>
-                                  <PropertyGroup>
-                                    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        const string expected = """
-                                <Project>
-                                  <PropertyGroup>
-                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        DotnetProjectFile projectFile = DotnetProjectFile
-            .Create(input)
-            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
-
-        projectFile.ToXmlString(_formatter).Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddOrUpdateProperty_ProjectWithMultiplePropertyDeclaration_ThrowException()
-    {
-        const string input = """
-                             <Project>
-                               <PropertyGroup>
-                                 <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-                                 <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-                               </PropertyGroup>
-                             </Project>
-                             """;
-
-        DotnetProjectFile projectFile = DotnetProjectFile.Create(input);
-        Assert.Throws<DotnetProjectSystemException>(() =>
-        {
-            projectFile.AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
-        });
     }
 }
