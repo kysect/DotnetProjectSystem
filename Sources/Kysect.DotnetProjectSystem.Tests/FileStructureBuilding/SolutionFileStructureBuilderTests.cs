@@ -62,7 +62,9 @@ public class SolutionFileStructureBuilderTests
         string content = "<Project></Project>";
 
         new SolutionFileStructureBuilder(solutionName)
-            .AddProject(new ProjectFileStructureBuilder(projectName, content))
+            .AddProject(
+                new ProjectFileStructureBuilder(projectName)
+                    .SetContent(content))
             .Save(_fileSystem, _rootPath, _syntaxFormatter);
 
         _asserts
