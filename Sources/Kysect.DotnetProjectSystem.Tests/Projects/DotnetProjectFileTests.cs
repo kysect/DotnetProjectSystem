@@ -271,6 +271,68 @@ public class DotnetProjectFileTests
     }
 
     [Fact]
+    public void AddOrUpdateProperty_ForEmptyProject_ReturnExpectedContent()
+    {
+        const string expected = """
+                                <Project>
+                                  <PropertyGroup>
+                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile
+            .CreateEmpty()
+            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
+    public void AddOrUpdateProperty_ProjectWithSameProperty_ReturnExpectedContent()
+    {
+        const string expected = """
+                                <Project>
+                                  <PropertyGroup>
+                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile
+            .Create(expected)
+            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
+    public void AddOrUpdateProperty_ProjectWithDifferentPropertyValue_ReturnExpectedContent()
+    {
+        const string input = """
+                                <Project>
+                                  <PropertyGroup>
+                                    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        const string expected = """
+                                <Project>
+                                  <PropertyGroup>
+                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile
+            .Create(input)
+            .AddOrUpdateProperty("ManagePackageVersionsCentrally", "true");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
     public void GetPackageReferences_PackageWithoutVersion_ReturnExpectedResult()
     {
         const string input = """

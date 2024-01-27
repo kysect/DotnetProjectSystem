@@ -52,4 +52,9 @@ public static class ExtendedSyntaxFactory
             XmlName(name),
             SyntaxFactory.Punctuation(SyntaxKind.DoubleQuoteToken, "\"", null, null));
     }
+
+    public static SyntaxList<SyntaxNode> XmlPropertyContent(string value)
+    {
+        return SyntaxFactory.List<SyntaxNode>(SyntaxFactory.XmlText(SyntaxFactory.XmlTextLiteralToken(value, null, null)));
+    }
 }
