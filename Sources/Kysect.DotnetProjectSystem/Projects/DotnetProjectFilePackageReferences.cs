@@ -55,4 +55,23 @@ public class DotnetProjectFilePackageReferences
 
         return result;
     }
+
+    public void RemovePackageReference(string name)
+    {
+        var nodes = new List<SyntaxNode>();
+
+        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        {
+            XmlAttributeSyntax? nameAttribute = xmlElementSyntax.GetAttribute("Include");
+            if (nameAttribute is null)
+                continue;
+
+            if (nameAttribute.Value != name)
+                continue;
+
+            nodes.Add(xmlElementSyntax.AsNode);
+        }
+
+        _projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
+    }
 }
