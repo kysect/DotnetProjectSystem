@@ -3,27 +3,12 @@ using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
-using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
 public class DotnetProjectFile
 {
     private XmlDocumentSyntax _content;
-
-    public static DotnetProjectFile Create(string path, IFileSystem fileSystem)
-    {
-        path.ThrowIfNull();
-        fileSystem.ThrowIfNull();
-
-        string csprojContent =
-            fileSystem.File.Exists(path)
-                ? fileSystem.File.ReadAllText(path)
-                : string.Empty;
-
-        XmlDocumentSyntax root = Parser.ParseText(csprojContent);
-        return new DotnetProjectFile(root);
-    }
 
     public DotnetProjectFile(XmlDocumentSyntax content)
     {
@@ -46,6 +31,18 @@ public class DotnetProjectFile
 
         return Create(contentTemplate);
     }
+
+    public static DotnetProjectFile CreateLegacyFormat()
+    {
+        string contentTemplate =
+            """
+            <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+            </Project>
+            """;
+
+        return Create(contentTemplate);
+    }
+
     public static DotnetProjectFile Create(string content)
     {
         XmlDocumentSyntax xmlDocumentSyntax = Parser.ParseText(content);
@@ -95,15 +92,22 @@ public class DotnetProjectFile
             .Descendants()
             .FirstOrDefault(s => s.Name == elementName);
 
-        if (propertyGroupNode is not null)
-            return propertyGroupNode;
+        // TODO: reduce duplication
+        if (propertyGroupNode is null)
+        {
+            propertyGroupNode = ExtendedSyntaxFactory.XmlElement(elementName);
+            IXmlElementSyntax changedProjectNode = projectNode
+                .AsSyntaxElement
+                .AddChild(propertyGroupNode);
 
-        propertyGroupNode = ExtendedSyntaxFactory.XmlElement(elementName);
-        IXmlElementSyntax changedProjectNode = projectNode
-            .AsSyntaxElement
-            .AddChild(propertyGroupNode);
+            _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
+            projectNode = GetProjectNode();
+            propertyGroupNode = projectNode
+                .AsSyntaxElement
+                .Descendants()
+                .First(s => s.Name == elementName);
+        }
 
-        _content = _content.ReplaceNode(projectNode.AsSyntaxElement.AsNode, changedProjectNode.AsNode);
         return propertyGroupNode;
     }
 
@@ -154,6 +158,41 @@ public class DotnetProjectFile
             throw new DotnetProjectSystemException($"Property {property} missed");
 
         return dotnetProjectProperty.Value;
+    }
+
+    public DotnetProjectFile AddCompileItem(string value)
+    {
+        return AddItem("Compile", value);
+    }
+
+    public DotnetProjectFile AddItem(string type, string value)
+    {
+        type.ThrowIfNull();
+        value.ThrowIfNull();
+
+        IXmlElementSyntax itemSyntax = ExtendedSyntaxFactory
+            .XmlEmptyElement(type)
+            .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", value));
+
+        IXmlElementSyntax itemGroup = GetOrAddItemGroup();
+        IXmlElementSyntax modifiedItemGroup = itemGroup.AddChild(itemSyntax);
+
+        _content = _content.ReplaceNode(itemGroup.AsNode, modifiedItemGroup.AsNode);
+        return this;
+    }
+
+    public DotnetProjectFile AddProperty(string name, string value)
+    {
+        XmlElementSyntax propertyElement = ExtendedSyntaxFactory
+            .XmlEmptyElement(name)
+            // TODO: move XML code to ExtendedSyntaxFactory
+            .WithContent(SyntaxFactory.List<SyntaxNode>(SyntaxFactory.XmlText(SyntaxFactory.XmlTextLiteralToken(value, null, null))));
+
+        IXmlElementSyntax propertyGroup = GetOrAddPropertyGroup();
+        IXmlElementSyntax modifiedItemGroup = propertyGroup.AddChild(propertyElement);
+
+        _content = _content.ReplaceNode(propertyGroup.AsNode, modifiedItemGroup.AsNode);
+        return this;
     }
 
     public string ToXmlString(XmlDocumentSyntaxFormatter formatter)

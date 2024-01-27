@@ -238,4 +238,40 @@ public class DotnetProjectFileTests
 
         compileItems.Should().Be(new DotnetProjectProperty("TargetFramework", "net8.0"));
     }
+
+    [Fact]
+    public void AddCompileItem_ForEmptyProject_ReturnExpectedContent()
+    {
+        const string expected = """
+                                <Project>
+                                  <ItemGroup>
+                                    <Compile Include="File1.cs" />
+                                  </ItemGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile
+            .CreateEmpty()
+            .AddCompileItem("File1.cs");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
+    public void AddProperty_ForEmptyProject_ReturnExpectedContent()
+    {
+        const string expected = """
+                                <Project>
+                                  <PropertyGroup>
+                                    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile
+            .CreateEmpty()
+            .AddProperty("ManagePackageVersionsCentrally", "true");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
 }

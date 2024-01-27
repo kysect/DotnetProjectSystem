@@ -26,4 +26,30 @@ public static class ExtendedSyntaxFactory
 
         return SyntaxFactory.XmlElement(startTagSyntax, SyntaxFactory.List<SyntaxNode>(), endTagSyntax);
     }
+
+    public static XmlEmptyElementSyntax XmlEmptyElement(string name)
+    {
+        return SyntaxFactory.XmlEmptyElement(
+            SyntaxFactory.Punctuation(SyntaxKind.LessThanToken, "<", null, null),
+            XmlName(name),
+            SyntaxFactory.List<XmlAttributeSyntax>(),
+            SyntaxFactory.Punctuation(SyntaxKind.SlashGreaterThanToken, "/>", SyntaxFactory.WhitespaceTrivia(" "), null));
+    }
+
+    // TODO: move formatting to Formatter
+    public static XmlAttributeSyntax XmlAttribute(string key, string value)
+    {
+        return SyntaxFactory.XmlAttribute(
+            SyntaxFactory.XmlName(null, SyntaxFactory.XmlNameToken(key, SyntaxFactory.WhitespaceTrivia(" "), null)),
+            SyntaxFactory.Punctuation(SyntaxKind.EqualsToken, "=", null, null),
+            XmlString(value));
+    }
+
+    public static XmlStringSyntax XmlString(string name)
+    {
+        return SyntaxFactory.XmlString(
+            SyntaxFactory.Punctuation(SyntaxKind.DoubleQuoteToken, "\"", null, null),
+            XmlName(name),
+            SyntaxFactory.Punctuation(SyntaxKind.DoubleQuoteToken, "\"", null, null));
+    }
 }
