@@ -9,28 +9,28 @@ public class DotnetSolutionModifier
 {
     private readonly IFileInfo _solutionPath;
     private readonly IFileSystem _fileSystem;
-    private DotnetPropsModifier? _directoryBuildPropsModifier;
-    private DotnetPropsModifier? _directoryPackagePropsModifier;
+    private DirectoryBuildPropsFile? _directoryBuildPropsModifier;
+    private DirectoryPackagesPropsFile? _directoryPackagePropsModifier;
     private readonly Dictionary<string, DotnetProjectModifier> _projects;
 
     public IReadOnlyCollection<DotnetProjectModifier> Projects => _projects.Values;
 
-    public DotnetPropsModifier GetOrCreateDirectoryBuildPropsModifier()
+    public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
     {
-        _directoryBuildPropsModifier ??= new DotnetPropsModifier(DotnetProjectFile.CreateEmpty());
+        _directoryBuildPropsModifier ??= new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
         return _directoryBuildPropsModifier;
     }
 
-    public DotnetPropsModifier? GetOrCreateDirectoryPackagePropsModifier()
+    public DirectoryPackagesPropsFile GetOrCreateDirectoryPackagePropsModifier()
     {
-        _directoryPackagePropsModifier ??= new DotnetPropsModifier(DotnetProjectFile.CreateEmpty());
+        _directoryPackagePropsModifier ??= new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
         return _directoryPackagePropsModifier;
     }
 
     public DotnetSolutionModifier(
         Dictionary<string, DotnetProjectModifier> projects,
-        DotnetPropsModifier? directoryBuildPropsModifier,
-        DotnetPropsModifier? directoryPackagePropsModifier,
+        DirectoryBuildPropsFile? directoryBuildPropsModifier,
+        DirectoryPackagesPropsFile? directoryPackagePropsModifier,
         IFileSystem fileSystem,
         IFileInfo solutionPath)
     {

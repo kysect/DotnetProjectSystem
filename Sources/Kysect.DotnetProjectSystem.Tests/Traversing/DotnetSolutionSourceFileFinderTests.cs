@@ -1,6 +1,7 @@
 ﻿using Kysect.CommonLib.DependencyInjection.Logging;
 using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
+using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Traversing;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
@@ -133,7 +134,10 @@ public class DotnetSolutionSourceFileFinderTests
 
         var solutionBuilder = new SolutionFileStructureBuilder("Solution")
             .AddProject(
-                new ProjectFileStructureBuilder("SampleProject", projectContent)
+                new ProjectFileStructureBuilder("SampleProject")
+                    .SetContent(
+                        DotnetProjectFile
+                            .Create(projectContent))
                     .AddEmptyFile("File1.cs")
                     .AddEmptyFile("File2.cs"));
 

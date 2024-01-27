@@ -23,23 +23,40 @@ public class DotnetSolutionModifierFactory
 
         IFileInfo solutionFileInfo = _fileSystem.FileInfo.New(solutionPath);
 
-        DotnetPropsModifier? directoryBuildPropsModifier = TryCreatePropsFile(solutionFileInfo, SolutionItemNameConstants.DirectoryBuildProps);
-        DotnetPropsModifier? directoryPackagePropsModifier = TryCreatePropsFile(solutionFileInfo, SolutionItemNameConstants.DirectoryPackagesProps);
+        DirectoryBuildPropsFile? directoryBuildPropsModifier = TryCreateDirectoryBuildPropsFile(solutionFileInfo);
+        DirectoryPackagesPropsFile? directoryPackagesPropsFile = TryCreateDirectoryPackagesPropsFile(solutionFileInfo);
         Dictionary<string, DotnetProjectModifier> projects = CreateProjectModifiers(solutionFileInfo);
 
-        return new DotnetSolutionModifier(projects, directoryBuildPropsModifier, directoryPackagePropsModifier, _fileSystem, solutionFileInfo);
+        return new DotnetSolutionModifier(
+            projects,
+            directoryBuildPropsModifier,
+            directoryPackagesPropsFile,
+            _fileSystem,
+            solutionFileInfo);
     }
 
-    private DotnetPropsModifier? TryCreatePropsFile(IFileInfo solutionFileInfo, string fileName)
+    private DirectoryBuildPropsFile? TryCreateDirectoryBuildPropsFile(IFileInfo solutionFileInfo)
     {
         solutionFileInfo.Directory.ThrowIfNull();
 
-        string path = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, fileName);
+        string path = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, SolutionItemNameConstants.DirectoryBuildProps);
         if (!_fileSystem.File.Exists(path))
             return null;
 
-        var dotnetProjectFile = Create(path, _fileSystem);
-        return new DotnetPropsModifier(dotnetProjectFile);
+        DotnetProjectFile dotnetProjectFile = Create(path, _fileSystem);
+        return new DirectoryBuildPropsFile(dotnetProjectFile);
+    }
+
+    private DirectoryPackagesPropsFile? TryCreateDirectoryPackagesPropsFile(IFileInfo solutionFileInfo)
+    {
+        solutionFileInfo.Directory.ThrowIfNull();
+
+        string path = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, SolutionItemNameConstants.DirectoryPackagesProps);
+        if (!_fileSystem.File.Exists(path))
+            return null;
+
+        DotnetProjectFile dotnetProjectFile = Create(path, _fileSystem);
+        return new DirectoryPackagesPropsFile(dotnetProjectFile);
     }
 
     private Dictionary<string, DotnetProjectModifier> CreateProjectModifiers(IFileInfo solutionFileInfo)

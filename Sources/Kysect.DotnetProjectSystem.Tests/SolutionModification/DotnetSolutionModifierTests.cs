@@ -2,6 +2,7 @@
 using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.SolutionModification;
+using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions.TestingHelpers;
 
@@ -12,6 +13,8 @@ public class DotnetSolutionModifierTests
     private readonly MockFileSystem _fileSystem;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
     private readonly DotnetSolutionModifierFactory _solutionModifierFactory;
+    private readonly FileSystemAsserts _fileSystemAsserts;
+    private readonly string _currentPath;
 
     public DotnetSolutionModifierTests()
     {
@@ -21,6 +24,8 @@ public class DotnetSolutionModifierTests
 
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
+        _currentPath = _fileSystem.Path.GetFullPath(".");
+        _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
     }
 
     [Fact]
@@ -41,12 +46,11 @@ public class DotnetSolutionModifierTests
                                 </Project>
                                 """;
 
-        string currentPath = _fileSystem.Path.GetFullPath(".");
-
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
+        new SolutionFileStructureBuilder("Solution")
             .AddProject(
-                new ProjectFileStructureBuilder("SampleProject", projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
+                new ProjectFileStructureBuilder("SampleProject")
+                    .SetContent(projectContent))
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier.Save(_syntaxFormatter);
@@ -71,20 +75,75 @@ public class DotnetSolutionModifierTests
                                      </Project>
                                      """;
 
-        string currentPath = _fileSystem.Path.GetFullPath(".");
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
+        new SolutionFileStructureBuilder("Solution")
             .AddProject(
-                new ProjectFileStructureBuilder("SampleProject", projectContent));
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
+                new ProjectFileStructureBuilder("SampleProject")
+                    .SetContent(projectContent))
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
-        var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
 
         foreach (DotnetProjectModifier solutionModifierProject in solutionModifier.Projects)
             solutionModifierProject.File.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
 
         solutionModifier.Save(_syntaxFormatter);
 
-        string fullPathToProjectFile = Path.Combine(@"SampleProject", "SampleProject.csproj");
-        _fileSystem.File.ReadAllText(fullPathToProjectFile).Should().Be(expectedProjectContent);
+        _fileSystemAsserts
+            .File("SampleProject", "SampleProject.csproj")
+            .ShouldExists()
+            .ShouldHaveContent(expectedProjectContent);
+    }
+
+    [Fact]
+    public void Save_AfterChangingDirectoryPackageProps_FileSaved()
+    {
+        var expectedContent = """
+                              <Project>
+                                <PropertyGroup>
+                                  <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                </PropertyGroup>
+                              </Project>
+                              """;
+
+        new SolutionFileStructureBuilder("Solution")
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        solutionModifier
+            .GetOrCreateDirectoryPackagePropsModifier()
+            .SetCentralPackageManagement(true);
+        solutionModifier.Save(_syntaxFormatter);
+
+        _fileSystemAsserts
+            .File(SolutionItemNameConstants.DirectoryPackagesProps)
+            .ShouldExists()
+            .ShouldHaveContent(expectedContent);
+    }
+
+    [Fact]
+    public void Save_AfterAddingValueToDirectoryBuildProps_FileSaved()
+    {
+        var expectedContent = """
+                              <Project>
+                                <PropertyGroup>
+                                  <Key>value</Key>
+                                </PropertyGroup>
+                              </Project>
+                              """;
+
+        new SolutionFileStructureBuilder("Solution")
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        solutionModifier
+            .GetOrCreateDirectoryBuildPropsModifier()
+            .File
+            .AddProperty("Key", "value");
+        solutionModifier.Save(_syntaxFormatter);
+
+        _fileSystemAsserts
+            .File(SolutionItemNameConstants.DirectoryBuildProps)
+            .ShouldExists()
+            .ShouldHaveContent(expectedContent);
     }
 }
