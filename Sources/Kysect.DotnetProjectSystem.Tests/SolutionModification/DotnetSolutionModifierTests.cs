@@ -1,5 +1,6 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
+using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
@@ -81,7 +82,7 @@ public class DotnetSolutionModifierTests
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
 
-        foreach (DotnetProjectModifier solutionModifierProject in solutionModifier.Projects)
+        foreach (DotnetCsprojFile solutionModifierProject in solutionModifier.Projects)
             solutionModifierProject.File.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
 
         solutionModifier.Save(_syntaxFormatter);

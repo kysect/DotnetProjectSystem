@@ -1,5 +1,6 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions.TestingHelpers;
 
@@ -37,11 +38,10 @@ public class SolutionFileStructureBuilderTests
     public void Save_AfterAddingFile_FileShouldExists()
     {
         string solutionName = "MySolution";
-        string directoryBuildProps = "Directory.Build.props";
         string content = "<Project></Project>";
 
         new SolutionFileStructureBuilder(solutionName)
-            .AddFile([directoryBuildProps], content)
+            .AddDirectoryBuildProps(content)
             .Save(_fileSystem, _rootPath, _syntaxFormatter);
 
         _asserts
@@ -49,7 +49,7 @@ public class SolutionFileStructureBuilderTests
             .ShouldExists();
 
         _asserts
-            .File(_rootPath, directoryBuildProps)
+            .File(_rootPath, SolutionItemNameConstants.DirectoryBuildProps)
             .ShouldExists()
             .ShouldHaveContent(content);
     }

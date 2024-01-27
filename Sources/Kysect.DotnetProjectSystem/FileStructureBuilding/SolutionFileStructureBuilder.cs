@@ -1,4 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
 
@@ -33,6 +34,16 @@ public class SolutionFileStructureBuilder
     {
         _files.Add(fileStructureElement);
         return this;
+    }
+
+    public SolutionFileStructureBuilder AddDirectoryBuildProps(string content)
+    {
+        return AddFile([SolutionItemNameConstants.DirectoryBuildProps], content);
+    }
+
+    public SolutionFileStructureBuilder AddDirectoryPackagesProps(string content)
+    {
+        return AddFile([SolutionItemNameConstants.DirectoryPackagesProps], content);
     }
 
     public void Save(IFileSystem fileSystem, string rootPath, XmlDocumentSyntaxFormatter syntaxFormatter)
