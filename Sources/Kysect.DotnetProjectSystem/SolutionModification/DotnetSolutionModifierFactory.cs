@@ -1,6 +1,7 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Tools;
 using Microsoft.Language.Xml;
 using System.IO.Abstractions;
 
@@ -71,7 +72,7 @@ public class DotnetSolutionModifierFactory
         {
             string projectFullPath = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, projectFileDescriptor.ProjectPath);
             if (!_fileSystem.File.Exists(projectFullPath))
-                throw new ArgumentException($"Project file with path {projectFullPath} was not found");
+                throw new DotnetProjectSystemException($"Project file with path {projectFullPath} was not found");
 
             var dotnetProjectFile = Create(projectFullPath, _fileSystem);
             var projectModifier = new DotnetProjectModifier(dotnetProjectFile);

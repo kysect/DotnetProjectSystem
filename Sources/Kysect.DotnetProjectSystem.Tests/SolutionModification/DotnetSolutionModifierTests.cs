@@ -1,5 +1,4 @@
-﻿using Kysect.CommonLib.DependencyInjection.Logging;
-using Kysect.DotnetProjectSystem.FileStructureBuilding;
+﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
@@ -18,14 +17,12 @@ public class DotnetSolutionModifierTests
 
     public DotnetSolutionModifierTests()
     {
+        _fileSystem = new MockFileSystem();
         var solutionFileContentParser = new SolutionFileContentParser();
-        DefaultLoggerConfiguration.CreateConsoleLogger();
-        _fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
-
-        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
     }
 
     [Fact]

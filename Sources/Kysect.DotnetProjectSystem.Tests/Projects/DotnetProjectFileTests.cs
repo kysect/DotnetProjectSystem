@@ -151,12 +151,7 @@ public class DotnetProjectFileTests
     [Fact]
     public void IsSdkFormat_ForLegacyFormat_ReturnFalse()
     {
-        string projectContent = """
-                                <Project ToolsVersion="15.0">
-                                </Project>
-                                """;
-
-        var sut = DotnetProjectFile.Create(projectContent);
+        var sut = DotnetProjectFile.CreateLegacyFormat();
 
         sut.IsSdkFormat().Should().BeFalse();
     }
