@@ -12,9 +12,14 @@ public class DirectoryPackagesPropsFile
         File = file;
     }
 
+    public bool GetCentralPackageManagement()
+    {
+        return File.FindBooleanProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally) ?? false;
+    }
+
     public void SetCentralPackageManagement(bool enabled)
     {
-        File.AddProperty("ManagePackageVersionsCentrally", enabled.ToString());
+        File.AddOrUpdateProperty(DotnetProjectFileConstant.ManagePackageVersionsCentrally, enabled.ToString());
     }
 
     public IReadOnlyCollection<ProjectPackageVersion> GetPackageVersions()

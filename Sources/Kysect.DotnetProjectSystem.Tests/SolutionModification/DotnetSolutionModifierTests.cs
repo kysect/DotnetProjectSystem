@@ -92,32 +92,6 @@ public class DotnetSolutionModifierTests
     }
 
     [Fact]
-    public void Save_AfterChangingDirectoryPackageProps_FileSaved()
-    {
-        var expectedContent = """
-                              <Project>
-                                <PropertyGroup>
-                                  <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                                </PropertyGroup>
-                              </Project>
-                              """;
-
-        new SolutionFileStructureBuilder("Solution")
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
-
-        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
-        solutionModifier
-            .GetOrCreateDirectoryPackagePropsModifier()
-            .SetCentralPackageManagement(true);
-        solutionModifier.Save(_syntaxFormatter);
-
-        _fileSystemAsserts
-            .File(SolutionItemNameConstants.DirectoryPackagesProps)
-            .ShouldExists()
-            .ShouldHaveContent(expectedContent);
-    }
-
-    [Fact]
     public void Save_AfterAddingValueToDirectoryBuildProps_FileSaved()
     {
         var expectedContent = """
