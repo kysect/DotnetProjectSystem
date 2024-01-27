@@ -113,4 +113,107 @@ public class CentralPackageManagementMigratorTests
             .ShouldExists()
             .ShouldHaveContent(expectedProjectContent);
     }
+
+    [Fact]
+    public void Migrate_TwoProjectWithSamePackage_MovePackageVersionToPackagesPropsWithoutDuplication()
+    {
+        const string expectedProjectContent = """
+                                              <Project>
+                                                <ItemGroup>
+                                                  <PackageReference Include="MyPackage" />
+                                                </ItemGroup>
+                                              </Project>
+                                              """;
+
+        const string expectedPackagesProps = """
+                                             <Project>
+                                               <PropertyGroup>
+                                                 <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                               </PropertyGroup>
+                                               <ItemGroup>
+                                                 <PackageVersion Include="MyPackage" Version="1.2.3" />
+                                               </ItemGroup>
+                                             </Project>
+                                             """;
+
+        var projectFile = DotnetProjectFile.CreateEmpty();
+        projectFile.PackageReferences.AddPackageReference("MyPackage", "1.2.3");
+
+        new SolutionFileStructureBuilder("Solution")
+            .AddProject(
+                new ProjectFileStructureBuilder("Project")
+                    .SetContent(projectFile))
+            .AddProject(
+                new ProjectFileStructureBuilder("Project2")
+                    .SetContent(projectFile))
+            .Save(_fileSystem, _currentPath, _formatter);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        _sut.Migrate(solutionModifier);
+
+        _fileSystemAsserts
+            .File([_currentPath, SolutionItemNameConstants.DirectoryPackagesProps])
+            .ShouldExists()
+            .ShouldHaveContent(expectedPackagesProps);
+
+        _fileSystemAsserts
+            .File([_currentPath, "Project", "Project.csproj"])
+            .ShouldExists()
+            .ShouldHaveContent(expectedProjectContent);
+
+        _fileSystemAsserts
+            .File([_currentPath, "Project2", "Project2.csproj"])
+            .ShouldExists()
+            .ShouldHaveContent(expectedProjectContent);
+    }
+
+    [Fact]
+    public void Migrate_TwoProjectWithPackageWithDifferentVersion_PackagesPropsContainsMaxVersion()
+    {
+        const string expectedProjectContent = """
+                                              <Project>
+                                                <ItemGroup>
+                                                  <PackageReference Include="MyPackage" />
+                                                </ItemGroup>
+                                              </Project>
+                                              """;
+
+        const string expectedPackagesProps = """
+                                             <Project>
+                                               <PropertyGroup>
+                                                 <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                                               </PropertyGroup>
+                                               <ItemGroup>
+                                                 <PackageVersion Include="MyPackage" Version="1.2.3" />
+                                               </ItemGroup>
+                                             </Project>
+                                             """;
+
+        new SolutionFileStructureBuilder("Solution")
+            .AddProject(
+                new ProjectFileStructureBuilder("Project")
+                    .SetContent(DotnetProjectFile.CreateEmpty().PackageReferences.AddPackageReference("MyPackage", "1.2.2")))
+            .AddProject(
+                new ProjectFileStructureBuilder("Project2")
+                    .SetContent(DotnetProjectFile.CreateEmpty().PackageReferences.AddPackageReference("MyPackage", "1.2.3")))
+            .Save(_fileSystem, _currentPath, _formatter);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        _sut.Migrate(solutionModifier);
+
+        _fileSystemAsserts
+            .File([_currentPath, SolutionItemNameConstants.DirectoryPackagesProps])
+            .ShouldExists()
+            .ShouldHaveContent(expectedPackagesProps);
+
+        _fileSystemAsserts
+            .File([_currentPath, "Project", "Project.csproj"])
+            .ShouldExists()
+            .ShouldHaveContent(expectedProjectContent);
+
+        _fileSystemAsserts
+            .File([_currentPath, "Project2", "Project2.csproj"])
+            .ShouldExists()
+            .ShouldHaveContent(expectedProjectContent);
+    }
 }

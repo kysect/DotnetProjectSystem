@@ -94,12 +94,12 @@ public class DotnetProjectFilePackageReferencesTests
     public void RemovePackageReference_ProjectWithPackage_PackageRemoved()
     {
         var input = """
-                       <Project>
-                         <ItemGroup>
-                           <PackageReference Include="PackageName" Version="1.2.3" />
-                         </ItemGroup>
-                       </Project>
-                       """;
+                    <Project>
+                      <ItemGroup>
+                        <PackageReference Include="PackageName" Version="1.2.3" />
+                      </ItemGroup>
+                    </Project>
+                    """;
 
         var expected = """
                        <Project>
@@ -114,4 +114,31 @@ public class DotnetProjectFilePackageReferencesTests
 
         projectFile.ToXmlString(_formatter).Should().Be(expected);
     }
+
+    [Fact]
+    public void UpdatePackageReference_ProjectWithVersion_ProjectHaveChangedVersion()
+    {
+        var input = """
+                    <Project>
+                      <ItemGroup>
+                        <PackageReference Include="PackageName" Version="1.2.3" />
+                      </ItemGroup>
+                    </Project>
+                    """;
+
+        var expected = """
+                       <Project>
+                         <ItemGroup>
+                           <PackageReference Include="PackageName" Version="1.2.4"/>
+                         </ItemGroup>
+                       </Project>
+                       """;
+
+        var projectFile = DotnetProjectFile.Create(input);
+
+        projectFile.PackageReferences.UpdatePackageReference("PackageName", "1.2.4");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
 }
