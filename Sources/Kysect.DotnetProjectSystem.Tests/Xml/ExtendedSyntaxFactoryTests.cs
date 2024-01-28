@@ -26,4 +26,19 @@ public class ExtendedSyntaxFactoryTests
 
         xmlElementSyntax.ToFullString().Should().Be(expected);
     }
+
+    [Fact]
+    public void XmlAttribute_ReturnExpectedString()
+    {
+        const string expected = """
+                                <ElementName AttributeName="AttributeValue" />
+                                """;
+
+        XmlEmptyElementSyntax xmlElementSyntax =
+            ExtendedSyntaxFactory
+                .XmlEmptyElement("ElementName")
+                .AddAttributes(ExtendedSyntaxFactory.XmlAttribute("AttributeName", "AttributeValue"));
+
+        xmlElementSyntax.ToFullString().Should().Be(expected);
+    }
 }

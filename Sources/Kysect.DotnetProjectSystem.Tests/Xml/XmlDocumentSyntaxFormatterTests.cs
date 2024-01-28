@@ -95,6 +95,7 @@ public class XmlDocumentSyntaxFormatterTests
 
         Validate(input, expected);
     }
+
     [Fact]
     public void Format_NodeWithContent_NodeInOneLine()
     {
@@ -106,6 +107,60 @@ public class XmlDocumentSyntaxFormatterTests
 
         var input = """
                     <Project><Node1>Some text</Node1>
+                    </Project>
+                    """;
+
+        Validate(input, expected);
+    }
+
+    [Fact]
+    public void Format_XmlElementWithAttributes_SpacesBetweenElements()
+    {
+        var expected = """
+                       <Project>
+                         <Node Attribute1="Value" Attribute2="Value" />
+                       </Project>
+                       """;
+
+        var input = """
+                    <Project>
+                      <Node Attribute1="Value"Attribute2="Value"/>
+                    </Project>
+                    """;
+
+        Validate(input, expected);
+    }
+
+    [Fact]
+    public void Format_XmlElementWithAttributesAndSpaceBeforeEnding_SpacesBetweenElements()
+    {
+        var expected = """
+                       <Project>
+                         <Node Attribute1="Value" Attribute2="Value" />
+                       </Project>
+                       """;
+
+        var input = """
+                    <Project>
+                      <Node Attribute1="Value"Attribute2="Value" />
+                    </Project>
+                    """;
+
+        Validate(input, expected);
+    }
+
+    [Fact]
+    public void Format_XmlEmptyTagWithoutAttribute_ExpectedResult()
+    {
+        var expected = """
+                       <Project>
+                         <Node />
+                       </Project>
+                       """;
+
+        var input = """
+                    <Project>
+                      <Node />
                     </Project>
                     """;
 
