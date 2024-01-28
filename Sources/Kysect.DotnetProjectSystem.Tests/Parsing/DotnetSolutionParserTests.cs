@@ -1,8 +1,8 @@
-﻿using Kysect.CommonLib.DependencyInjection.Logging;
-using Kysect.DotnetProjectSystem.FileStructureBuilding;
+﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
+using Kysect.DotnetProjectSystem.Tests.Tools;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
@@ -21,7 +21,7 @@ public class DotnetSolutionParserTests
 
     public DotnetSolutionParserTests()
     {
-        ILogger logger = DefaultLoggerConfiguration.CreateConsoleLogger();
+        ILogger logger = TestLoggerProvider.Provide();
 
         _fileSystem = new MockFileSystem();
         _solutionStructureParser = new DotnetSolutionParser(_fileSystem, logger);
@@ -37,10 +37,12 @@ public class DotnetSolutionParserTests
         string solutionName = "Solution";
         string solutionPath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
 
-        Assert.Throws<DotnetProjectSystemException>(() =>
+        var exception = Assert.Throws<DotnetProjectSystemException>(() =>
         {
             _solutionStructureParser.Parse(solutionPath);
         });
+
+        exception.Message.Should().Be($"Cannot parse solution {solutionPath}. File not found.");
     }
 
     [Fact]

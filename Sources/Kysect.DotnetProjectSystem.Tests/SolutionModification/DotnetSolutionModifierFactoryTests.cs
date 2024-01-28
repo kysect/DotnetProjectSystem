@@ -34,10 +34,12 @@ public class DotnetSolutionModifierFactoryTests
         string projectFilePath = _fileSystem.Path.Combine(_currentPath, "Project", "Project.csproj");
         _fileSystem.File.Delete(projectFilePath);
 
-        Assert.Throws<DotnetProjectSystemException>(() =>
+        var exception = Assert.Throws<DotnetProjectSystemException>(() =>
         {
             _solutionModifierFactory.Create("Solution.sln");
         });
+
+        exception.Message.Should().Be($"Project file with path {projectFilePath} was not found");
     }
 
     [Fact]
@@ -60,6 +62,36 @@ public class DotnetSolutionModifierFactoryTests
         new SolutionFileStructureBuilder("Solution")
             .AddDirectoryBuildProps(directoryBuildPropsContent)
             .AddDirectoryPackagesProps(directoryPackagesPropsContent)
+            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        solutionModifier
+            .GetOrCreateDirectoryBuildPropsModifier()
+            .File
+            .ToXmlString(_syntaxFormatter)
+            .Should().Be(directoryBuildPropsContent);
+
+        solutionModifier
+            .GetOrCreateDirectoryPackagePropsModifier()
+            .File
+            .ToXmlString(_syntaxFormatter)
+            .Should().Be(directoryPackagesPropsContent);
+    }
+
+    [Fact]
+    public void Create_ForSolutionWithoutDirectoryFiles_DirectoryFileMustBeCreatedOnRead()
+    {
+        var directoryBuildPropsContent = """
+                                         <Project>
+                                         </Project>
+                                         """;
+
+        var directoryPackagesPropsContent = """
+                                            <Project>
+                                            </Project>
+                                            """;
+
+        new SolutionFileStructureBuilder("Solution")
             .Save(_fileSystem, _currentPath, _syntaxFormatter);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");

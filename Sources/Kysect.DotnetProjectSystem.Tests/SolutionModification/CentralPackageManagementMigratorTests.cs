@@ -1,9 +1,9 @@
-﻿using Kysect.CommonLib.DependencyInjection.Logging;
-using Kysect.DotnetProjectSystem.FileStructureBuilding;
+﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
+using Kysect.DotnetProjectSystem.Tests.Tools;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions.TestingHelpers;
@@ -23,7 +23,7 @@ public class CentralPackageManagementMigratorTests
     {
         _formatter = new XmlDocumentSyntaxFormatter();
         _fileSystem = new MockFileSystem();
-        _sut = new CentralPackageManagementMigrator(_formatter, DefaultLoggerConfiguration.CreateConsoleLogger());
+        _sut = new CentralPackageManagementMigrator(_formatter, TestLoggerProvider.Provide());
         _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, new SolutionFileContentParser());
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
@@ -40,10 +40,12 @@ public class CentralPackageManagementMigratorTests
             .Save(_fileSystem, _currentPath, _formatter);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
-        Assert.Throws<DotnetProjectSystemException>(() =>
+        var exception = Assert.Throws<DotnetProjectSystemException>(() =>
         {
             _sut.Migrate(solutionModifier);
         });
+
+        exception.Message.Should().Be("Cannot migrate solution to CPM. Solution already use CPM.");
     }
 
     [Fact]

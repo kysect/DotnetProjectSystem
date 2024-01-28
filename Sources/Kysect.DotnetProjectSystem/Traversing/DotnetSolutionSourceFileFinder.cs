@@ -26,7 +26,6 @@ public class DotnetSolutionSourceFileFinder
         solutionDescriptor.ThrowIfNull();
 
         _logger.LogInformation("Extract source file paths for solution {path}", solutionDescriptor.FilePath);
-        _fileSystem.File.Exists(solutionDescriptor.FilePath);
 
         var projectPaths = new List<DotnetProjectPaths>();
 
@@ -51,8 +50,11 @@ public class DotnetSolutionSourceFileFinder
                 string objDirectoryPath = _fileSystem.Path.Combine(projectFileInfo.Directory.FullName, "obj");
 
                 _logger.LogInformation("Default items enabled. Trying to add files in directory");
-                var defaultItems = _fileSystem.Directory
-                    .EnumerateFiles(projectFileInfo.Directory.FullName, "*", SearchOption.AllDirectories)
+                List<string> allFiles = _fileSystem.Directory
+                    .EnumerateFiles(projectFileInfo.Directory.FullName, "", SearchOption.AllDirectories)
+                    .ToList();
+
+                List<string> defaultItems = allFiles
                     .Where(p => p != projectFileInfo.FullName)
                     .Where(p => !p.StartsWith(binDirectoryPath))
                     .Where(p => !p.StartsWith(objDirectoryPath))

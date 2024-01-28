@@ -34,8 +34,8 @@ public class CentralPackageManagementMigrator
         directoryPackagesPropsFile.SetCentralPackageManagement(true);
 
         _logger.LogDebug("Adding package versions to {DirectoryPackageFile}", SolutionItemNameConstants.DirectoryPackagesProps);
-        foreach ((string name, string version) in nugetPackages)
-            directoryPackagesPropsFile.Versions.AddPackageVersion(name, version);
+        foreach (var package in nugetPackages)
+            directoryPackagesPropsFile.Versions.AddPackageVersion(package.Name, package.Version);
 
         _logger.LogTrace("Apply changes to *.csproj files");
         foreach (DotnetCsprojFile csprojFile in solutionModifier.Projects)
