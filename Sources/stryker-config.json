@@ -1,9 +1,8 @@
 {
   "stryker-config": {
-    "concurrency": 10,
+    "concurrency": 2,
     "mutation-level": "Standard",
     "language-version": "latest",
-    "additional-timeout": 5000,
     "mutate": [
       "**/*"
     ],
