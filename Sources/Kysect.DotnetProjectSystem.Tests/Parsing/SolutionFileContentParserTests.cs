@@ -53,9 +53,9 @@ public class SolutionFileContentParserTests
                            # Visual Studio Version 17
                            VisualStudioVersion = 17.9.34310.174
                            MinimumVisualStudioVersion = 10.0.40219.1
-                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser\Kysect.DotnetSlnParser.csproj", "{00000000-0000-0000-0000-000000000000}"
+                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser/Kysect.DotnetSlnParser.csproj", "{00000000-0000-0000-0000-000000000000}"
                            EndProject
-                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser.Tests", "Kysect.DotnetSlnParser.Tests\Kysect.DotnetSlnParser.Tests.vdproj", "{00000000-0000-0000-0000-000000000000}"
+                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser.Tests", "Kysect.DotnetSlnParser.Tests/Kysect.DotnetSlnParser.Tests.vdproj", "{00000000-0000-0000-0000-000000000000}"
                            EndProject
                            Global
                              GlobalSection(SolutionProperties) = preSolution
@@ -69,7 +69,7 @@ public class SolutionFileContentParserTests
             new DotnetProjectFileDescriptor(
                 Guid.Empty,
                 "Kysect.DotnetSlnParser",
-                _fileSystem.Path.Combine("Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser.csproj"),
+                "Kysect.DotnetSlnParser/Kysect.DotnetSlnParser.csproj",
                 Guid.Empty),
         };
 
@@ -86,7 +86,7 @@ public class SolutionFileContentParserTests
                            # Visual Studio Version 17
                            VisualStudioVersion = 17.9.34310.174
                            MinimumVisualStudioVersion = 10.0.40219.1
-                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser\Kysect.DotnetSlnParser.csproj", "{00000000-0000-0000-0000-000000000000}"
+                           Project("{00000000-0000-0000-0000-000000000000}") = "Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser/Kysect.DotnetSlnParser.csproj", "{00000000-0000-0000-0000-000000000000}"
                            EndProject
                            Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCA4E9AC-020E-4040-90EF-56DA53FD874E}"
                              ProjectSection(SolutionItems) = preProject
@@ -106,7 +106,7 @@ public class SolutionFileContentParserTests
             new DotnetProjectFileDescriptor(
                 Guid.Empty,
                 "Kysect.DotnetSlnParser",
-                _fileSystem.Path.Combine("Kysect.DotnetSlnParser", "Kysect.DotnetSlnParser.csproj"),
+                "Kysect.DotnetSlnParser/Kysect.DotnetSlnParser.csproj",
                 Guid.Empty),
         };
 

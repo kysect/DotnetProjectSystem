@@ -1,7 +1,7 @@
-﻿using Kysect.CommonLib.DependencyInjection.Logging;
-using Kysect.DotnetProjectSystem.FileStructureBuilding;
+﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Tests.Tools;
 using Kysect.DotnetProjectSystem.Traversing;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
@@ -18,7 +18,7 @@ public class DotnetSolutionSourceFileFinderTests
 
     public DotnetSolutionSourceFileFinderTests()
     {
-        ILogger logger = DefaultLoggerConfiguration.CreateConsoleLogger();
+        ILogger logger = TestLoggerProvider.Provide();
 
         _fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
         _solutionStructureParser = new DotnetSolutionParser(_fileSystem, logger);
