@@ -14,7 +14,7 @@ public class DotnetSolutionModifier
     private DirectoryPackagesPropsFile? _directoryPackagePropsModifier;
     private readonly Dictionary<string, DotnetCsprojFile> _projects;
 
-    public IReadOnlyCollection<DotnetCsprojFile> Projects => _projects.Values;
+    public IReadOnlyCollection<KeyValuePair<string, DotnetCsprojFile>> Projects => _projects;
 
     public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
     {
