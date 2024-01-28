@@ -38,11 +38,11 @@ public class CentralPackageManagementMigrator
             directoryPackagesPropsFile.Versions.AddPackageVersion(package.Name, package.Version);
 
         _logger.LogTrace("Apply changes to *.csproj files");
-        foreach (DotnetCsprojFile csprojFile in solutionModifier.Projects)
+        foreach (KeyValuePair<string, DotnetCsprojFile> csprojFile in solutionModifier.Projects)
         {
-            foreach ((string name, string? _) in csprojFile.File.PackageReferences.GetPackageReferences())
+            foreach ((string name, string? _) in csprojFile.Value.File.PackageReferences.GetPackageReferences())
             {
-                csprojFile.File.PackageReferences.RemoveVersion(name);
+                csprojFile.Value.File.PackageReferences.RemoveVersion(name);
             }
         }
 
@@ -54,9 +54,9 @@ public class CentralPackageManagementMigrator
     {
         var nugetVersions = new List<ProjectPackageVersion>();
 
-        foreach (var dotnetProjectModifier in modifier.Projects)
+        foreach (KeyValuePair<string, DotnetCsprojFile> dotnetProjectModifier in modifier.Projects)
         {
-            foreach (var packageReferences in dotnetProjectModifier.File.PackageReferences.GetPackageReferences())
+            foreach (ProjectPackageReference packageReferences in dotnetProjectModifier.Value.File.PackageReferences.GetPackageReferences())
             {
                 if (packageReferences.Version is null)
                     continue;
