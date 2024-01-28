@@ -9,8 +9,13 @@ public static class XmlElementSyntaxExtensions
     {
         xmlElementSyntax.ThrowIfNull();
 
-        while (xmlElementSyntax.Elements.Any())
-            xmlElementSyntax = xmlElementSyntax.RemoveChild(xmlElementSyntax.Elements.First());
+        IXmlElementSyntax? child = xmlElementSyntax.Elements.FirstOrDefault();
+
+        while (child is not null)
+        {
+            xmlElementSyntax = xmlElementSyntax.RemoveChild(child);
+            child = xmlElementSyntax.Elements.FirstOrDefault();
+        }
 
         return xmlElementSyntax;
     }

@@ -37,10 +37,12 @@ public class DotnetSolutionParserTests
         string solutionName = "Solution";
         string solutionPath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
 
-        Assert.Throws<DotnetProjectSystemException>(() =>
+        var exception = Assert.Throws<DotnetProjectSystemException>(() =>
         {
             _solutionStructureParser.Parse(solutionPath);
         });
+
+        exception.Message.Should().Be($"Cannot parse solution {solutionPath}. File not found.");
     }
 
     [Fact]

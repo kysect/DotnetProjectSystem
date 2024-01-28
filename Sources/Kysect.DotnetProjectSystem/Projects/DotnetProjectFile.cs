@@ -1,5 +1,4 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
-using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Language.Xml;
@@ -61,15 +60,6 @@ public class DotnetProjectFile
     {
         morphism.ThrowIfNull();
         _content = morphism(_content);
-    }
-
-    public void UpdateDocument<TSyntax>(IXmlProjectFileModifyStrategy<TSyntax> modifyStrategy)
-        where TSyntax : SyntaxNode
-    {
-        modifyStrategy.ThrowIfNull();
-
-        IReadOnlyCollection<TSyntax> nodes = modifyStrategy.SelectNodeForModify(_content);
-        _content = _content.ReplaceNodes(nodes, (_, n) => modifyStrategy.ApplyChanges(n));
     }
 
     public IXmlElement GetProjectNode()

@@ -40,10 +40,12 @@ public class CentralPackageManagementMigratorTests
             .Save(_fileSystem, _currentPath, _formatter);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
-        Assert.Throws<DotnetProjectSystemException>(() =>
+        var exception = Assert.Throws<DotnetProjectSystemException>(() =>
         {
             _sut.Migrate(solutionModifier);
         });
+
+        exception.Message.Should().Be("Cannot migrate solution to CPM. Solution already use CPM.");
     }
 
     [Fact]

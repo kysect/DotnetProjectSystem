@@ -103,7 +103,6 @@ public class XmlDocumentSyntaxFormatter
     private IXmlElement AddLeadingTrivia(int depth, XmlElementSyntax xmlElementSyntax)
     {
         string trivia = GetTrivia(depth);
-        xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia));
 
         // TODO: remove this hack for first node
         bool needTriviaForStartTag = depth != 0;

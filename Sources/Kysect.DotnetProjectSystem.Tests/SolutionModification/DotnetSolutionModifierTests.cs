@@ -1,6 +1,5 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
-using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
@@ -53,44 +52,6 @@ public class DotnetSolutionModifierTests
 
         var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier.Save(_syntaxFormatter);
-    }
-
-    [Fact]
-    public void Save_AfterChangingTargetFramework_ChangeFileContentToExpected()
-    {
-        string projectContent = """
-                                <Project Sdk="Microsoft.NET.Sdk">
-                                  <PropertyGroup>
-                                    <TargetFramework>net8.0</TargetFramework>
-                                  </PropertyGroup>
-                                </Project>
-                                """;
-
-        var expectedProjectContent = """
-                                     <Project Sdk="Microsoft.NET.Sdk">
-                                       <PropertyGroup>
-                                         <TargetFramework>net9.0</TargetFramework>
-                                       </PropertyGroup>
-                                     </Project>
-                                     """;
-
-        new SolutionFileStructureBuilder("Solution")
-            .AddProject(
-                new ProjectFileStructureBuilder("SampleProject")
-                    .SetContent(projectContent))
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
-
-        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
-
-        foreach (DotnetCsprojFile solutionModifierProject in solutionModifier.Projects)
-            solutionModifierProject.File.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
-
-        solutionModifier.Save(_syntaxFormatter);
-
-        _fileSystemAsserts
-            .File("SampleProject", "SampleProject.csproj")
-            .ShouldExists()
-            .ShouldHaveContent(expectedProjectContent);
     }
 
     [Fact]
