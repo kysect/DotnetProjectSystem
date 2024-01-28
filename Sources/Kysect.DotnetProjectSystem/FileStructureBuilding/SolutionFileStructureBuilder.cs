@@ -1,5 +1,6 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.CommonLib.FileSystem;
+using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
@@ -11,6 +12,8 @@ public class SolutionFileStructureBuilder
     private readonly string _solutionName;
     private readonly List<ProjectFileStructureBuilder> _projects;
     private readonly List<SolutionStructureElement> _files;
+    private DirectoryBuildPropsFile? _directoryBuildPropsFile;
+    private DirectoryPackagesPropsFile? _directoryPackagesPropsFile;
 
     public SolutionFileStructureBuilder(string solutionName)
     {
@@ -39,12 +42,24 @@ public class SolutionFileStructureBuilder
 
     public SolutionFileStructureBuilder AddDirectoryBuildProps(string content)
     {
-        return AddFile([SolutionItemNameConstants.DirectoryBuildProps], content);
+        return AddDirectoryBuildProps(new DirectoryBuildPropsFile(DotnetProjectFile.Create(content)));
+    }
+
+    public SolutionFileStructureBuilder AddDirectoryBuildProps(DirectoryBuildPropsFile directoryBuildPropsFile)
+    {
+        _directoryBuildPropsFile = directoryBuildPropsFile;
+        return this;
     }
 
     public SolutionFileStructureBuilder AddDirectoryPackagesProps(string content)
     {
-        return AddFile([SolutionItemNameConstants.DirectoryPackagesProps], content);
+        return AddDirectoryPackagesProps(new DirectoryPackagesPropsFile(DotnetProjectFile.Create(content)));
+    }
+
+    public SolutionFileStructureBuilder AddDirectoryPackagesProps(DirectoryPackagesPropsFile directoryPackagesPropsFile)
+    {
+        _directoryPackagesPropsFile = directoryPackagesPropsFile;
+        return this;
     }
 
     public void Save(IFileSystem fileSystem, string solutionDirectory, XmlDocumentSyntaxFormatter syntaxFormatter)
@@ -56,7 +71,13 @@ public class SolutionFileStructureBuilder
         DirectoryExtensions.EnsureDirectoryExists(fileSystem, solutionDirectory);
         fileSystem.File.WriteAllText(fileSystem.Path.Combine(solutionDirectory, $"{_solutionName}.sln"), solutionFileContent);
 
-        foreach (var solutionFileInfo in _files)
+        if (_directoryBuildPropsFile is not null)
+            AddFile([SolutionItemNameConstants.DirectoryBuildProps], _directoryBuildPropsFile.File.ToXmlString(syntaxFormatter));
+
+        if (_directoryPackagesPropsFile is not null)
+            AddFile([SolutionItemNameConstants.DirectoryPackagesProps], _directoryPackagesPropsFile.File.ToXmlString(syntaxFormatter));
+
+        foreach (SolutionStructureElement? solutionFileInfo in _files)
         {
             string partialFilePath = fileSystem.Path.Combine(solutionFileInfo.Path.ToArray());
             fileSystem.File.WriteAllText(fileSystem.Path.Combine(solutionDirectory, partialFilePath), solutionFileInfo.Content);
