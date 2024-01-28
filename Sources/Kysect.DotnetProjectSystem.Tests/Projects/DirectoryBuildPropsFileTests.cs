@@ -1,9 +1,17 @@
 ﻿using Kysect.DotnetProjectSystem.Projects;
+using Kysect.DotnetProjectSystem.Xml;
 
 namespace Kysect.DotnetProjectSystem.Tests.Projects;
 
 public class DirectoryBuildPropsFileTests
 {
+    private readonly XmlDocumentSyntaxFormatter _formatter;
+
+    public DirectoryBuildPropsFileTests()
+    {
+        _formatter = new XmlDocumentSyntaxFormatter();
+    }
+
     [Fact]
     public void ArtifactsOutputEnabled_ForEmptyFile_ReturnFalse()
     {
@@ -53,5 +61,23 @@ public class DirectoryBuildPropsFileTests
         bool actual = directoryPackagesPropsFile.ArtifactsOutputEnabled();
 
         actual.Should().Be(false);
+    }
+
+    [Fact]
+    public void SetArtifactsOutput_ForEmptyFile_CreateExpectedString()
+    {
+        const string expected = """
+                             <Project>
+                               <PropertyGroup>
+                                 <UseArtifactsOutput>true</UseArtifactsOutput>
+                               </PropertyGroup>
+                             </Project>
+                             """;
+
+        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
+
+        directoryPackagesPropsFile.SetArtifactsOutput(true);
+
+        directoryPackagesPropsFile.File.ToXmlString(_formatter).Should().Be(expected);
     }
 }
