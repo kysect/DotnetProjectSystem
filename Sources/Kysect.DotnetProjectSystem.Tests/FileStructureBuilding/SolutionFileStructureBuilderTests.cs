@@ -76,4 +76,18 @@ public class SolutionFileStructureBuilderTests
             .ShouldExists()
             .ShouldHaveContent(content);
     }
+
+    [Fact]
+    public void Save_ParentDirectoryNotExist_CreateSolutionDirectory()
+    {
+        string solutionName = "MySolution";
+        string solutionFullPath = _fileSystem.Path.Combine(_rootPath, "Sources");
+
+        new SolutionFileStructureBuilder(solutionName)
+            .Save(_fileSystem, solutionFullPath, _syntaxFormatter);
+
+        _asserts
+            .File(_rootPath, "Sources", $"{solutionName}.sln")
+            .ShouldExists();
+    }
 }
