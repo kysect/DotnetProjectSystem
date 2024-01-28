@@ -25,6 +25,7 @@ public class XmlDocumentSyntaxFormatter
     {
         currentElement.ThrowIfNull();
 
+        currentElement = FormatAttributes(currentElement);
         IXmlElementSyntax modified = currentElement.AsSyntaxElement;
         modified = modified.RemoveAllChild();
 
@@ -37,6 +38,44 @@ public class XmlDocumentSyntaxFormatter
         }
 
         return AddLeadingTrivia(depth, modified);
+    }
+
+    private IXmlElement FormatAttributes(IXmlElement currentElement)
+    {
+        IXmlElementSyntax currentElementSyntax = currentElement.AsSyntaxElement;
+
+        bool needRemoveTrailingTriviaForNameNode = currentElementSyntax.Attributes.Any();
+        if (needRemoveTrailingTriviaForNameNode)
+        {
+            XmlNameSyntax nameNodeWithoutTrailingTrivia = currentElementSyntax.NameNode.WithoutTrailingTrivia();
+            currentElementSyntax = (IXmlElementSyntax) currentElementSyntax.AsNode.ReplaceNode(currentElement.AsSyntaxElement.NameNode, nameNodeWithoutTrailingTrivia);
+        }
+
+        if (currentElementSyntax.Attributes.Any())
+        {
+            List<PunctuationSyntax> punctuationSyntaxes = currentElementSyntax
+                .AsNode
+                .DescendantNodes()
+                .OfType<PunctuationSyntax>()
+                .Where(p => p.Kind == SyntaxKind.SlashGreaterThanToken)
+                .ToList();
+
+            currentElementSyntax = (IXmlElementSyntax) currentElementSyntax.AsNode.ReplaceNodes(punctuationSyntaxes, (_, n) =>
+            {
+                return n
+                    .WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(" "))
+                    .WithoutTrailingTrivia();
+            });
+        }
+
+        currentElementSyntax = (IXmlElementSyntax) currentElementSyntax.AsNode.ReplaceNodes(currentElementSyntax.Attributes, (_, n) =>
+        {
+            return n
+                .WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(" "))
+                .WithoutTrailingTrivia();
+        });
+
+        return currentElementSyntax.AsElement;
     }
 
     private IXmlElement AddLeadingTrivia(int depth, IXmlElementSyntax modified)

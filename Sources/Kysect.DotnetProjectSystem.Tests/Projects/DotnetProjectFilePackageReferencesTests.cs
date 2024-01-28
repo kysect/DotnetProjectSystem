@@ -129,7 +129,7 @@ public class DotnetProjectFilePackageReferencesTests
         var expected = """
                        <Project>
                          <ItemGroup>
-                           <PackageReference Include="PackageName" Version="1.2.4"/>
+                           <PackageReference Include="PackageName" Version="1.2.4" />
                          </ItemGroup>
                        </Project>
                        """;
