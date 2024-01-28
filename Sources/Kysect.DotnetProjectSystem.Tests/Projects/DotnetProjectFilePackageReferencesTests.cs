@@ -97,6 +97,7 @@ public class DotnetProjectFilePackageReferencesTests
                     <Project>
                       <ItemGroup>
                         <PackageReference Include="PackageName" Version="1.2.3" />
+                        <PackageReference Include="PackageName1" Version="1.2.3" />
                       </ItemGroup>
                     </Project>
                     """;
@@ -104,6 +105,7 @@ public class DotnetProjectFilePackageReferencesTests
         var expected = """
                        <Project>
                          <ItemGroup>
+                           <PackageReference Include="PackageName1" Version="1.2.3" />
                          </ItemGroup>
                        </Project>
                        """;
@@ -136,9 +138,36 @@ public class DotnetProjectFilePackageReferencesTests
 
         var projectFile = DotnetProjectFile.Create(input);
 
-        projectFile.PackageReferences.UpdatePackageReference("PackageName", "1.2.4");
+        projectFile.PackageReferences.SetPackageReference("PackageName", "1.2.4");
 
         projectFile.ToXmlString(_formatter).Should().Be(expected);
     }
 
+    [Fact]
+    public void RemoveVersion_ProjectWithVersion_ReturnExpectedResult()
+    {
+        var input = """
+                    <Project>
+                      <ItemGroup>
+                        <PackageReference Include="PackageName" Version="1.2.0" />
+                        <PackageReference Include="PackageName2" Version="1.2.3" />
+                      </ItemGroup>
+                    </Project>
+                    """;
+
+        var expected = """
+                       <Project>
+                         <ItemGroup>
+                           <PackageReference Include="PackageName" />
+                           <PackageReference Include="PackageName2" Version="1.2.3" />
+                         </ItemGroup>
+                       </Project>
+                       """;
+
+        var projectFile = DotnetProjectFile.Create(input);
+
+        projectFile.PackageReferences.RemoveVersion("PackageName");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
 }

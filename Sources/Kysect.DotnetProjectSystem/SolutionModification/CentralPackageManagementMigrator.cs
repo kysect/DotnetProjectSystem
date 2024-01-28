@@ -35,14 +35,14 @@ public class CentralPackageManagementMigrator
 
         _logger.LogDebug("Adding package versions to {DirectoryPackageFile}", SolutionItemNameConstants.DirectoryPackagesProps);
         foreach ((string name, string version) in nugetPackages)
-            directoryPackagesPropsFile.AddPackageVersion(name, version);
+            directoryPackagesPropsFile.Versions.AddPackageVersion(name, version);
 
         _logger.LogTrace("Apply changes to *.csproj files");
         foreach (DotnetCsprojFile csprojFile in solutionModifier.Projects)
         {
             foreach ((string name, string? _) in csprojFile.File.PackageReferences.GetPackageReferences())
             {
-                csprojFile.File.PackageReferences.UpdatePackageReference(name, null);
+                csprojFile.File.PackageReferences.RemoveVersion(name);
             }
         }
 
