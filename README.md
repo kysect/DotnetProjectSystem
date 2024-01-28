@@ -1,6 +1,7 @@
 # Kysect.DotnetProjectSystem
 
 [![codecov](https://codecov.io/gh/kysect/DotnetProjectSystem/graph/badge.svg?token=eRI09WyDsH)](https://codecov.io/gh/kysect/DotnetProjectSystem)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fkysect%2FDotnetProjectSystem%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/kysect/DotnetProjectSystem/master)
 
 DotnetProjectSystem is a nuget package for working with .sln, .csproj and .props files: parsing, modifying and generating.
 

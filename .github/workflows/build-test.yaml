@@ -42,3 +42,10 @@ jobs:
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Run mutation tests
+      run: dotnet tool restore
+      run: dotnet stryker --reporter dashboard
+      working-directory: ${{ env.working-directory }}
+      env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}

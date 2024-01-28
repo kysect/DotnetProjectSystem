@@ -1,0 +1,16 @@
+{
+  "stryker-config": {
+    "concurrency": 10,
+    "mutation-level": "Standard",
+    "language-version": "latest",
+    "additional-timeout": 5000,
+    "mutate": [
+      "**/*"
+    ],
+    "ignore-mutations": [],
+    "ignore-methods": [
+        "*Log*",
+        "*ThrowIfNull*"
+    ]
+  }
+}
