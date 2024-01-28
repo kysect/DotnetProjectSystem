@@ -1,4 +1,4 @@
-﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
@@ -63,7 +63,7 @@ public class ProjectFileStructureBuilder
         string csprojDirectoryPath = fileSystem.Path.Combine(rootPath, ProjectName);
         string csprojPath = fileSystem.Path.Combine(csprojDirectoryPath, $"{ProjectName}.csproj");
 
-        fileSystem.EnsureDirectoryExists(csprojDirectoryPath);
+        DirectoryExtensions.EnsureDirectoryExists(fileSystem, csprojDirectoryPath);
         string csprojContent = _projectFile.ToXmlString(syntaxFormatter);
         fileSystem.File.WriteAllText(csprojPath, csprojContent);
 
@@ -72,7 +72,7 @@ public class ProjectFileStructureBuilder
             string[] fileFullPathParts = [csprojDirectoryPath, .. solutionFileInfo.Path];
             string fileFullPath = fileSystem.Path.Combine(fileFullPathParts);
             IFileInfo fileInfo = fileSystem.FileInfo.New(fileFullPath);
-            fileSystem.EnsureContainingDirectoryExists(fileInfo);
+            DirectoryExtensions.EnsureParentDirectoryExists(fileSystem, fileInfo);
 
             fileSystem.File.WriteAllText(fileFullPath, solutionFileInfo.Content);
         }
