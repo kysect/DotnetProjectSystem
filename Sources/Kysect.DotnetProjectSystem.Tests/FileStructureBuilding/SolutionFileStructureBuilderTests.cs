@@ -1,4 +1,5 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
+using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
@@ -39,9 +40,10 @@ public class SolutionFileStructureBuilderTests
     {
         string solutionName = "MySolution";
         string content = "<Project></Project>";
+        var directoryBuildPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(content));
 
         new SolutionFileStructureBuilder(solutionName)
-            .AddDirectoryBuildProps(content)
+            .AddDirectoryBuildProps(directoryBuildPropsFile)
             .Save(_fileSystem, _rootPath, _syntaxFormatter);
 
         _asserts

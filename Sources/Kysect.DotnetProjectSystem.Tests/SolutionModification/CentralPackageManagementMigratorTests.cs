@@ -36,7 +36,7 @@ public class CentralPackageManagementMigratorTests
         directoryPackagesPropsFile.SetCentralPackageManagement(true);
 
         new SolutionFileStructureBuilder("Solution")
-            .AddDirectoryPackagesProps(directoryPackagesPropsFile.File.ToXmlString(_formatter))
+            .AddDirectoryPackagesProps(directoryPackagesPropsFile)
             .Save(_fileSystem, _currentPath, _formatter);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
