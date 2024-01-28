@@ -9,14 +9,14 @@ public class SolutionFileStructureBuilder
 {
     private readonly string _solutionName;
     private readonly List<ProjectFileStructureBuilder> _projects;
-    private readonly List<SolutionFileInfoElement> _files;
+    private readonly List<SolutionStructureElement> _files;
 
     public SolutionFileStructureBuilder(string solutionName)
     {
         _solutionName = solutionName;
 
         _projects = new List<ProjectFileStructureBuilder>();
-        _files = new List<SolutionFileInfoElement>();
+        _files = new List<SolutionStructureElement>();
     }
 
     public SolutionFileStructureBuilder AddProject(ProjectFileStructureBuilder project)
@@ -27,10 +27,10 @@ public class SolutionFileStructureBuilder
 
     public SolutionFileStructureBuilder AddFile(IReadOnlyCollection<string> path, string content)
     {
-        return AddFile(new SolutionFileInfoElement(path, content));
+        return AddFile(new SolutionStructureElement(path, content));
     }
 
-    public SolutionFileStructureBuilder AddFile(SolutionFileInfoElement fileStructureElement)
+    public SolutionFileStructureBuilder AddFile(SolutionStructureElement fileStructureElement)
     {
         _files.Add(fileStructureElement);
         return this;
