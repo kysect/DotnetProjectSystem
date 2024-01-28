@@ -1,4 +1,5 @@
-using Kysect.CommonLib.BaseTypes.Extensions;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.CommonLib.FileSystem;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
@@ -8,14 +9,14 @@ namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
 public class ProjectFileStructureBuilder
 {
     private DotnetProjectFile _projectFile;
-    private readonly List<SolutionFileInfoElement> _files;
+    private readonly List<SolutionStructureElement> _files;
 
     public string ProjectName { get; }
 
     public ProjectFileStructureBuilder(string projectName)
     {
         ProjectName = projectName;
-        _files = new List<SolutionFileInfoElement>();
+        _files = new List<SolutionStructureElement>();
         _projectFile = DotnetProjectFile.CreateEmpty();
     }
 
@@ -42,15 +43,15 @@ public class ProjectFileStructureBuilder
 
     public ProjectFileStructureBuilder AddEmptyFile(params string[] path)
     {
-        return AddFile(new SolutionFileInfoElement(path, string.Empty));
+        return AddFile(new SolutionStructureElement(path, string.Empty));
     }
 
     public ProjectFileStructureBuilder AddFile(IReadOnlyCollection<string> path, string content)
     {
-        return AddFile(new SolutionFileInfoElement(path, content));
+        return AddFile(new SolutionStructureElement(path, content));
     }
 
-    public ProjectFileStructureBuilder AddFile(SolutionFileInfoElement fileStructureElement)
+    public ProjectFileStructureBuilder AddFile(SolutionStructureElement fileStructureElement)
     {
         _files.Add(fileStructureElement);
         return this;
@@ -67,7 +68,7 @@ public class ProjectFileStructureBuilder
         string csprojContent = _projectFile.ToXmlString(syntaxFormatter);
         fileSystem.File.WriteAllText(csprojPath, csprojContent);
 
-        foreach (SolutionFileInfoElement? solutionFileInfo in _files)
+        foreach (SolutionStructureElement? solutionFileInfo in _files)
         {
             string[] fileFullPathParts = [csprojDirectoryPath, .. solutionFileInfo.Path];
             string fileFullPath = fileSystem.Path.Combine(fileFullPathParts);
