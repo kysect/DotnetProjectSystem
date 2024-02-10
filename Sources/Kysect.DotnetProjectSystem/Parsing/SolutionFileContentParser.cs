@@ -32,6 +32,7 @@ public class SolutionFileContentParser
                 if (!Guid.TryParse(projectTypeIdString, out Guid projectTypeId))
                     throw new DotnetProjectSystemException($"Project type id {projectTypeIdString} is not valid id");
 
+                projectPath = FormatPath(projectPath);
                 var project = new DotnetProjectFileDescriptor(projectTypeId, projectName, projectPath, projectId);
                 result.Add(project);
             }
@@ -40,5 +41,12 @@ public class SolutionFileContentParser
         }
 
         return result;
+    }
+
+    private string FormatPath(string path)
+    {
+        return path
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
     }
 }
