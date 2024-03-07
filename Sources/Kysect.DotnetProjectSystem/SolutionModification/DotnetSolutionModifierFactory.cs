@@ -69,7 +69,7 @@ public class DotnetSolutionModifierFactory
         var projects = new Dictionary<string, DotnetCsprojFile>();
         foreach (DotnetProjectFileDescriptor projectFileDescriptor in projectFileDescriptors)
         {
-            string projectFullPath = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, projectFileDescriptor.ProjectPath);
+            string projectFullPath = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, projectFileDescriptor.FileSystemPath);
             if (!_fileSystem.File.Exists(projectFullPath))
                 throw new DotnetProjectSystemException($"Project file with path {projectFullPath} was not found");
 
