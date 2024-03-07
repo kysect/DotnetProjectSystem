@@ -39,7 +39,7 @@ public class DotnetSolutionParser
         var projects = new Dictionary<string, DotnetProjectFile>();
         foreach (DotnetProjectFileDescriptor? projectFileDescriptor in projectFileDescriptors)
         {
-            string projectFullPath = _fileSystem.Path.Combine(solutionDirectory.FullName, projectFileDescriptor.ProjectPath);
+            string projectFullPath = _fileSystem.Path.Combine(solutionDirectory.FullName, projectFileDescriptor.FileSystemPath);
 
             _logger.LogTrace("Parsing project {path}", projectFullPath);
             string csprojContent = _fileSystem.File.ReadAllText(projectFullPath);

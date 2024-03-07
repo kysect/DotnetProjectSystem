@@ -33,7 +33,7 @@ public class SolutionFileContentParser
                     throw new DotnetProjectSystemException($"Project type id {projectTypeIdString} is not valid id");
 
                 projectPath = FormatPath(projectPath);
-                var project = new DotnetProjectFileDescriptor(projectTypeId, projectName, projectPath, projectId);
+                var project = new DotnetProjectFileDescriptor(projectTypeId, projectName, projectPath, string.Empty, projectId);
                 result.Add(project);
             }
 
