@@ -35,9 +35,9 @@ public class SolutionFileStringBuilder
 
     public SolutionFileStringBuilder AddProject(string projectName, string projectPath)
     {
-        // TODO: Support generating of unique GUID
+        // TODO: Generate some default project type ID
         string projectDefinition = $$"""
-                                     Project("{{{Guid.Empty}}}") = "{{projectName}}", "{{projectPath}}", "{{{Guid.Empty}}}"
+                                     Project("{{{Guid.Empty}}}") = "{{projectName}}", "{{projectPath}}", "{{{Guid.NewGuid()}}}"
                                      EndProject
                                      """;
 
