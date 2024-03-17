@@ -9,14 +9,18 @@ namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
 
 public class SolutionFileStructureBuilder
 {
+    private readonly IFileSystem _fileSystem;
+    private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
     private readonly string _solutionName;
     private readonly List<ProjectFileStructureBuilder> _projects;
     private readonly List<SolutionStructureElement> _files;
     private DirectoryBuildPropsFile? _directoryBuildPropsFile;
     private DirectoryPackagesPropsFile? _directoryPackagesPropsFile;
 
-    public SolutionFileStructureBuilder(string solutionName)
+    public SolutionFileStructureBuilder(IFileSystem fileSystem, XmlDocumentSyntaxFormatter syntaxFormatter, string solutionName)
     {
+        _fileSystem = fileSystem;
+        _syntaxFormatter = syntaxFormatter;
         _solutionName = solutionName;
 
         _projects = new List<ProjectFileStructureBuilder>();
@@ -62,29 +66,27 @@ public class SolutionFileStructureBuilder
         return this;
     }
 
-    public void Save(IFileSystem fileSystem, string solutionDirectory, XmlDocumentSyntaxFormatter syntaxFormatter)
+    public void Save(string solutionDirectory)
     {
-        fileSystem.ThrowIfNull();
+        string solutionFileContent = CreateSolutionFile(_fileSystem);
 
-        string solutionFileContent = CreateSolutionFile(fileSystem);
-
-        DirectoryExtensions.EnsureDirectoryExists(fileSystem, solutionDirectory);
-        fileSystem.File.WriteAllText(fileSystem.Path.Combine(solutionDirectory, $"{_solutionName}.sln"), solutionFileContent);
+        DirectoryExtensions.EnsureDirectoryExists(_fileSystem, solutionDirectory);
+        _fileSystem.File.WriteAllText(_fileSystem.Path.Combine(solutionDirectory, $"{_solutionName}.sln"), solutionFileContent);
 
         if (_directoryBuildPropsFile is not null)
-            AddFile([SolutionItemNameConstants.DirectoryBuildProps], _directoryBuildPropsFile.File.ToXmlString(syntaxFormatter));
+            AddFile([SolutionItemNameConstants.DirectoryBuildProps], _directoryBuildPropsFile.File.ToXmlString(_syntaxFormatter));
 
         if (_directoryPackagesPropsFile is not null)
-            AddFile([SolutionItemNameConstants.DirectoryPackagesProps], _directoryPackagesPropsFile.File.ToXmlString(syntaxFormatter));
+            AddFile([SolutionItemNameConstants.DirectoryPackagesProps], _directoryPackagesPropsFile.File.ToXmlString(_syntaxFormatter));
 
         foreach (SolutionStructureElement? solutionFileInfo in _files)
         {
-            string partialFilePath = fileSystem.Path.Combine(solutionFileInfo.Path.ToArray());
-            fileSystem.File.WriteAllText(fileSystem.Path.Combine(solutionDirectory, partialFilePath), solutionFileInfo.Content);
+            string partialFilePath = _fileSystem.Path.Combine(solutionFileInfo.Path.ToArray());
+            _fileSystem.File.WriteAllText(_fileSystem.Path.Combine(solutionDirectory, partialFilePath), solutionFileInfo.Content);
         }
 
         foreach (ProjectFileStructureBuilder projectBuilder in _projects)
-            projectBuilder.Save(fileSystem, solutionDirectory, syntaxFormatter);
+            projectBuilder.Save(_fileSystem, solutionDirectory, _syntaxFormatter);
     }
 
     public string CreateSolutionFile(IFileSystem fileSystem)

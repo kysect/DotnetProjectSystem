@@ -15,6 +15,7 @@ public class DotnetSolutionSourceFileFinderTests
     private readonly DotnetSolutionSourceFileFinder _sourceFileFinder;
     private readonly MockFileSystem _fileSystem;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public DotnetSolutionSourceFileFinderTests()
     {
@@ -24,6 +25,7 @@ public class DotnetSolutionSourceFileFinderTests
         _solutionStructureParser = new DotnetSolutionParser(_fileSystem, logger);
         _sourceFileFinder = new DotnetSolutionSourceFileFinder(_fileSystem, logger);
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
     [Fact]
@@ -51,13 +53,13 @@ public class DotnetSolutionSourceFileFinderTests
             _fileSystem.Path.Combine(currentPath, "Solution.sln"),
             new[] { expectedProjectPaths });
 
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory
+            .Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject", projectContent)
                     .AddEmptyFile("File1.cs")
-                    .AddEmptyFile("InnerDirectory", "File2.cs"));
-
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
+                    .AddEmptyFile("InnerDirectory", "File2.cs"))
+            .Save(currentPath);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 
@@ -89,15 +91,14 @@ public class DotnetSolutionSourceFileFinderTests
             _fileSystem.Path.Combine(currentPath, "Solution.sln"),
             new[] { expectedProjectPaths });
 
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject", projectContent)
                     .AddEmptyFile("File1.cs")
                     .AddEmptyFile("InnerDirectory", "File2.cs")
                     .AddEmptyFile("bin", "Bin.cs")
-                    .AddEmptyFile("obj", "Obj.cs"));
-
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
+                    .AddEmptyFile("obj", "Obj.cs"))
+            .Save(currentPath);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 
@@ -132,16 +133,16 @@ public class DotnetSolutionSourceFileFinderTests
             _fileSystem.Path.Combine(currentPath, "Solution.sln"),
             new[] { expectedProjectPaths });
 
-        var solutionBuilder = new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory
+            .Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject")
                     .SetContent(
                         DotnetProjectFile
                             .Create(projectContent))
                     .AddEmptyFile("File1.cs")
-                    .AddEmptyFile("File2.cs"));
-
-        solutionBuilder.Save(_fileSystem, currentPath, _syntaxFormatter);
+                    .AddEmptyFile("File2.cs"))
+            .Save(currentPath);
         DotnetSolutionDescriptor dotnetSolutionDescriptor = _solutionStructureParser.Parse("Solution.sln");
         DotnetSolutionPaths dotnetSolutionPaths = _sourceFileFinder.FindSourceFiles(dotnetSolutionDescriptor);
 
