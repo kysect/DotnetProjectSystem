@@ -2,6 +2,7 @@
 using Kysect.DotnetProjectSystem.Parsing;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tools;
+using Kysect.DotnetProjectSystem.Xml;
 using System.IO.Abstractions;
 
 namespace Kysect.DotnetProjectSystem.SolutionModification;
@@ -10,11 +11,13 @@ public class DotnetSolutionModifierFactory
 {
     private readonly IFileSystem _fileSystem;
     private readonly SolutionFileContentParser _solutionFileParser;
+    private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
 
-    public DotnetSolutionModifierFactory(IFileSystem fileSystem, SolutionFileContentParser solutionFileParser)
+    public DotnetSolutionModifierFactory(IFileSystem fileSystem, SolutionFileContentParser solutionFileParser, XmlDocumentSyntaxFormatter syntaxFormatter)
     {
         _fileSystem = fileSystem;
         _solutionFileParser = solutionFileParser;
+        _syntaxFormatter = syntaxFormatter;
     }
 
     public DotnetSolutionModifier Create(string solutionPath)
@@ -32,7 +35,8 @@ public class DotnetSolutionModifierFactory
             directoryBuildPropsModifier,
             directoryPackagesPropsFile,
             _fileSystem,
-            solutionFileInfo);
+            solutionFileInfo,
+            _syntaxFormatter);
     }
 
     private DirectoryBuildPropsFile? TryCreateDirectoryBuildPropsFile(IFileInfo solutionFileInfo)

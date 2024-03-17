@@ -24,8 +24,8 @@ public class CentralPackageManagementMigratorTests
     {
         _formatter = new XmlDocumentSyntaxFormatter();
         _fileSystem = new MockFileSystem();
-        _sut = new CentralPackageManagementMigrator(_formatter, TestLoggerProvider.Provide());
-        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, new SolutionFileContentParser());
+        _sut = new CentralPackageManagementMigrator(TestLoggerProvider.Provide());
+        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, new SolutionFileContentParser(), _formatter);
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
         _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _formatter);

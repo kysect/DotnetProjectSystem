@@ -20,11 +20,11 @@ public class DotnetSolutionModifierTests
     public DotnetSolutionModifierTests()
     {
         _fileSystem = new MockFileSystem();
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         var solutionFileContentParser = new SolutionFileContentParser();
-        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
+        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser, _syntaxFormatter);
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
-        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
@@ -53,7 +53,7 @@ public class DotnetSolutionModifierTests
             .Save(_currentPath);
 
         var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
-        solutionModifier.Save(_syntaxFormatter);
+        solutionModifier.Save();
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class DotnetSolutionModifierTests
             .File
             .Properties
             .AddProperty("Key", "value");
-        solutionModifier.Save(_syntaxFormatter);
+        solutionModifier.Save();
 
         _fileSystemAsserts
             .File(SolutionItemNameConstants.DirectoryBuildProps)
