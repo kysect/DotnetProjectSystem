@@ -169,4 +169,30 @@ public class DotnetProjectFilePropertiesTests
             projectFile.Properties.SetProperty("ManagePackageVersionsCentrally", "true");
         });
     }
+
+    [Fact]
+    public void RemoveProperty_ProjectWithProperty_PropertyMustBeRemoved()
+    {
+        const string input = """
+                             <Project>
+                               <PropertyGroup>
+                                 <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+                               </PropertyGroup>
+                             </Project>
+                             """;
+
+        const string expected = """
+                                <Project>
+                                  <PropertyGroup>
+                                  </PropertyGroup>
+                                </Project>
+                                """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile.Create(input);
+        projectFile
+            .Properties
+            .RemoveProperty("ManagePackageVersionsCentrally");
+
+        projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
 }
