@@ -10,12 +10,15 @@ DotnetProjectSystem is a nuget package for working with .sln, .csproj and .props
 This code samples:
 
 ```csharp
-new SolutionFileStructureBuilder(solutionName)
+var factory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
+
+factory
+    .Create(solutionName)
     .AddProject(
         new ProjectFileStructureBuilder("Project")
             .SetContent("<Project></Project>"))
     .AddFile(new SolutionFileInfo(["Directory.Build.props"], "<Project></Project>"))
-    .Save(_fileSystem, "C:\\Repositories\\", _syntaxFormatter);
+    .Save("C:\\Repositories\\");
 ```
 
 will create this file structure:

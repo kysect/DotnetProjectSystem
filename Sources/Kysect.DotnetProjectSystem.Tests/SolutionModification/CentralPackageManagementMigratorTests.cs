@@ -18,6 +18,7 @@ public class CentralPackageManagementMigratorTests
     private readonly FileSystemAsserts _fileSystemAsserts;
     private readonly XmlDocumentSyntaxFormatter _formatter;
     private readonly string _currentPath;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public CentralPackageManagementMigratorTests()
     {
@@ -27,6 +28,7 @@ public class CentralPackageManagementMigratorTests
         _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, new SolutionFileContentParser());
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _formatter);
     }
 
     [Fact]
@@ -35,9 +37,9 @@ public class CentralPackageManagementMigratorTests
         var directoryPackagesPropsFile = new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
         directoryPackagesPropsFile.SetCentralPackageManagement(true);
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddDirectoryPackagesProps(directoryPackagesPropsFile)
-            .Save(_fileSystem, _currentPath, _formatter);
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         var exception = Assert.Throws<DotnetProjectSystemException>(() =>
@@ -59,8 +61,8 @@ public class CentralPackageManagementMigratorTests
                                 </Project>
                                 """;
 
-        new SolutionFileStructureBuilder("Solution")
-            .Save(_fileSystem, _currentPath, _formatter);
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         _sut.Migrate(solutionModifier);
@@ -96,11 +98,11 @@ public class CentralPackageManagementMigratorTests
         var projectFile = DotnetProjectFile.CreateEmpty();
         projectFile.PackageReferences.AddPackageReference("MyPackage", "1.2.3");
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("Project")
                     .SetContent(projectFile))
-            .Save(_fileSystem, _currentPath, _formatter);
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         _sut.Migrate(solutionModifier);
@@ -141,14 +143,14 @@ public class CentralPackageManagementMigratorTests
         var projectFile = DotnetProjectFile.CreateEmpty();
         projectFile.PackageReferences.AddPackageReference("MyPackage", "1.2.3");
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("Project")
                     .SetContent(projectFile))
             .AddProject(
                 new ProjectFileStructureBuilder("Project2")
                     .SetContent(projectFile))
-            .Save(_fileSystem, _currentPath, _formatter);
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         _sut.Migrate(solutionModifier);
@@ -191,14 +193,14 @@ public class CentralPackageManagementMigratorTests
                                              </Project>
                                              """;
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("Project")
                     .SetContent(DotnetProjectFile.CreateEmpty().PackageReferences.AddPackageReference("MyPackage", "1.2.2")))
             .AddProject(
                 new ProjectFileStructureBuilder("Project2")
                     .SetContent(DotnetProjectFile.CreateEmpty().PackageReferences.AddPackageReference("MyPackage", "1.2.3")))
-            .Save(_fileSystem, _currentPath, _formatter);
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         _sut.Migrate(solutionModifier);

@@ -15,6 +15,7 @@ public class DotnetSolutionModifierTests
     private readonly DotnetSolutionModifierFactory _solutionModifierFactory;
     private readonly FileSystemAsserts _fileSystemAsserts;
     private readonly string _currentPath;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public DotnetSolutionModifierTests()
     {
@@ -24,6 +25,7 @@ public class DotnetSolutionModifierTests
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
     [Fact]
@@ -44,11 +46,11 @@ public class DotnetSolutionModifierTests
                                 </Project>
                                 """;
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(
                 new ProjectFileStructureBuilder("SampleProject")
                     .SetContent(projectContent))
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+            .Save(_currentPath);
 
         var solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier.Save(_syntaxFormatter);
@@ -65,8 +67,8 @@ public class DotnetSolutionModifierTests
                               </Project>
                               """;
 
-        new SolutionFileStructureBuilder("Solution")
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier

@@ -13,6 +13,7 @@ public class DotnetSolutionModifierFactoryTests
     private readonly DotnetSolutionModifierFactory _solutionModifierFactory;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
     private readonly string _currentPath;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public DotnetSolutionModifierFactoryTests()
     {
@@ -20,6 +21,7 @@ public class DotnetSolutionModifierFactoryTests
         var solutionFileContentParser = new SolutionFileContentParser();
         _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
 
         _currentPath = _fileSystem.Path.GetFullPath(".");
     }
@@ -27,9 +29,9 @@ public class DotnetSolutionModifierFactoryTests
     [Fact]
     public void Create_ForSolutionWithIncorrectProjectPath_ThrowException()
     {
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddProject(new ProjectFileStructureBuilder("Project"))
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+            .Save(_currentPath);
 
         string projectFilePath = _fileSystem.Path.Combine(_currentPath, "Project", "Project.csproj");
         _fileSystem.File.Delete(projectFilePath);
@@ -59,10 +61,10 @@ public class DotnetSolutionModifierFactoryTests
                                             </Project>
                                             """;
 
-        new SolutionFileStructureBuilder("Solution")
+        _solutionFileStructureBuilderFactory.Create("Solution")
             .AddDirectoryBuildProps(directoryBuildPropsContent)
             .AddDirectoryPackagesProps(directoryPackagesPropsContent)
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier
@@ -91,8 +93,8 @@ public class DotnetSolutionModifierFactoryTests
                                             </Project>
                                             """;
 
-        new SolutionFileStructureBuilder("Solution")
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .Save(_currentPath);
 
         DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
         solutionModifier

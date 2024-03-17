@@ -18,6 +18,7 @@ public class DotnetSolutionParserTests
     private readonly string _currentPath;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
     private readonly DotnetSolutionDescriptorAsserts _solutionDescriptorAsserts;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public DotnetSolutionParserTests()
     {
@@ -29,6 +30,7 @@ public class DotnetSolutionParserTests
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         _solutionDescriptorAsserts = new DotnetSolutionDescriptorAsserts(_syntaxFormatter);
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
     [Fact]
@@ -51,8 +53,8 @@ public class DotnetSolutionParserTests
         string solutionName = "Solution";
         string solutionPath = _fileSystem.Path.Combine(_currentPath, $"{solutionName}.sln");
 
-        new SolutionFileStructureBuilder(solutionName)
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+        _solutionFileStructureBuilderFactory.Create(solutionName)
+            .Save(_currentPath);
 
         DotnetSolutionDescriptor solutionDescriptor = _solutionStructureParser.Parse(solutionPath);
 
@@ -80,11 +82,11 @@ public class DotnetSolutionParserTests
             solutionFilePath,
             new Dictionary<string, DotnetProjectFile> { { projectPath, DotnetProjectFile.Create(projectContent) } });
 
-        new SolutionFileStructureBuilder(solutionName)
+        _solutionFileStructureBuilderFactory.Create(solutionName)
             .AddProject(
                 new ProjectFileStructureBuilder(projectName)
                     .SetContent(projectContent))
-            .Save(_fileSystem, _currentPath, _syntaxFormatter);
+            .Save(_currentPath);
 
         DotnetSolutionDescriptor solutionDescriptor = _solutionStructureParser.Parse(solutionFilePath);
 

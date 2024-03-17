@@ -1,4 +1,5 @@
-﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
+﻿
+using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
@@ -13,6 +14,7 @@ public class SolutionFileStructureBuilderTests
     private readonly MockFileSystem _fileSystem;
     private readonly FileSystemAsserts _asserts;
     private readonly XmlDocumentSyntaxFormatter _syntaxFormatter;
+    private readonly SolutionFileStructureBuilderFactory _solutionFileStructureBuilderFactory;
 
     public SolutionFileStructureBuilderTests()
     {
@@ -20,6 +22,7 @@ public class SolutionFileStructureBuilderTests
         _rootPath = _fileSystem.Path.GetFullPath(".");
         _asserts = new FileSystemAsserts(_fileSystem);
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
     [Fact]
@@ -27,8 +30,8 @@ public class SolutionFileStructureBuilderTests
     {
         string solutionName = "MySolution";
 
-        new SolutionFileStructureBuilder(solutionName)
-            .Save(_fileSystem, _rootPath, _syntaxFormatter);
+        _solutionFileStructureBuilderFactory.Create(solutionName)
+            .Save(_rootPath);
 
         _asserts
             .File(_rootPath, $"{solutionName}.sln")
@@ -42,9 +45,9 @@ public class SolutionFileStructureBuilderTests
         string content = "<Project></Project>";
         var directoryBuildPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(content));
 
-        new SolutionFileStructureBuilder(solutionName)
+        _solutionFileStructureBuilderFactory.Create(solutionName)
             .AddDirectoryBuildProps(directoryBuildPropsFile)
-            .Save(_fileSystem, _rootPath, _syntaxFormatter);
+            .Save(_rootPath);
 
         _asserts
             .File(_rootPath, $"{solutionName}.sln")
@@ -63,11 +66,11 @@ public class SolutionFileStructureBuilderTests
         string projectName = "Project";
         string content = "<Project></Project>";
 
-        new SolutionFileStructureBuilder(solutionName)
+        _solutionFileStructureBuilderFactory.Create(solutionName)
             .AddProject(
                 new ProjectFileStructureBuilder(projectName)
                     .SetContent(content))
-            .Save(_fileSystem, _rootPath, _syntaxFormatter);
+            .Save(_rootPath);
 
         _asserts
             .File(_rootPath, $"{solutionName}.sln")
@@ -85,8 +88,8 @@ public class SolutionFileStructureBuilderTests
         string solutionName = "MySolution";
         string solutionFullPath = _fileSystem.Path.Combine(_rootPath, "Sources");
 
-        new SolutionFileStructureBuilder(solutionName)
-            .Save(_fileSystem, solutionFullPath, _syntaxFormatter);
+        _solutionFileStructureBuilderFactory.Create(solutionName)
+            .Save(solutionFullPath);
 
         _asserts
             .File(_rootPath, "Sources", $"{solutionName}.sln")
