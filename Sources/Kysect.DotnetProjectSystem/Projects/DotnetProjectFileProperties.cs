@@ -99,4 +99,19 @@ public class DotnetProjectFileProperties
         _projectFile.AddChildAndUpdateDocument(propertyGroup, propertyElement);
         return this;
     }
+
+    public DotnetProjectFileProperties RemoveProperty(string name)
+    {
+        IReadOnlyCollection<IXmlElementSyntax> properties = _projectFile.GetNodesByName(name);
+
+        if (properties.Count == 0)
+            return this;
+
+        List<XmlNodeSyntax> nodes = properties
+            .Select(p => p.AsNode)
+            .ToList();
+
+        _projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
+        return this;
+    }
 }
