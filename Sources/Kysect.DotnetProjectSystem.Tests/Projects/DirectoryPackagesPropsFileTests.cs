@@ -21,11 +21,11 @@ public class DirectoryPackagesPropsFileTests
     public DirectoryPackagesPropsFileTests()
     {
         _fileSystem = new MockFileSystem();
+        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         var solutionFileContentParser = new SolutionFileContentParser();
-        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
+        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser, _syntaxFormatter);
         _currentPath = _fileSystem.Path.GetFullPath(".");
         _fileSystemAsserts = new FileSystemAsserts(_fileSystem);
-        _syntaxFormatter = new XmlDocumentSyntaxFormatter();
         _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
     }
 
@@ -49,7 +49,7 @@ public class DirectoryPackagesPropsFileTests
         solutionModifier
             .GetOrCreateDirectoryPackagePropsModifier()
             .SetCentralPackageManagement(true);
-        solutionModifier.Save(_syntaxFormatter);
+        solutionModifier.Save();
 
         _fileSystemAsserts
             .File(SolutionItemNameConstants.DirectoryPackagesProps)

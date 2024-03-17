@@ -2,19 +2,16 @@
 using Kysect.CommonLib.Collections.Extensions;
 using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.Tools;
-using Kysect.DotnetProjectSystem.Xml;
 using Microsoft.Extensions.Logging;
 
 namespace Kysect.DotnetProjectSystem.SolutionModification;
 
 public class CentralPackageManagementMigrator
 {
-    private readonly XmlDocumentSyntaxFormatter _formatter;
     private readonly ILogger _logger;
 
-    public CentralPackageManagementMigrator(XmlDocumentSyntaxFormatter formatter, ILogger logger)
+    public CentralPackageManagementMigrator(ILogger logger)
     {
-        _formatter = formatter;
         _logger = logger;
     }
 
@@ -47,7 +44,7 @@ public class CentralPackageManagementMigrator
         }
 
         _logger.LogTrace("Saving solution files");
-        solutionModifier.Save(_formatter);
+        solutionModifier.Save();
     }
 
     private IReadOnlyCollection<ProjectPackageVersion> CollectNugetIncludes(DotnetSolutionModifier modifier)

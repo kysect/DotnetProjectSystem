@@ -18,9 +18,9 @@ public class DotnetSolutionModifierFactoryTests
     public DotnetSolutionModifierFactoryTests()
     {
         _fileSystem = new MockFileSystem();
-        var solutionFileContentParser = new SolutionFileContentParser();
-        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser);
         _syntaxFormatter = new XmlDocumentSyntaxFormatter();
+        var solutionFileContentParser = new SolutionFileContentParser();
+        _solutionModifierFactory = new DotnetSolutionModifierFactory(_fileSystem, solutionFileContentParser, _syntaxFormatter);
         _solutionFileStructureBuilderFactory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
 
         _currentPath = _fileSystem.Path.GetFullPath(".");
