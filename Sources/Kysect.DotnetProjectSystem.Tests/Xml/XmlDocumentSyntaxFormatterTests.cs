@@ -167,6 +167,26 @@ public class XmlDocumentSyntaxFormatterTests
         Validate(input, expected);
     }
 
+    [Fact]
+    public void Format_FileWithComment_ExpectNoChanges()
+    {
+        var input = """
+                    <Project>
+                      <!-- First -->
+                      <PropertyGroup>
+                        <IncludeSymbols>true</IncludeSymbols>
+                      </PropertyGroup>
+                    
+                      <!-- Second -->
+                      <PropertyGroup>
+                        <IncludeSymbols>true</IncludeSymbols>
+                      </PropertyGroup>
+                    </Project>
+                    """;
+
+        Validate(input, input);
+    }
+
     private void Validate(string input, string expected)
     {
         XmlDocumentSyntax document = Parser.ParseText(input);
