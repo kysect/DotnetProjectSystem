@@ -1,5 +1,6 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.CommonLib.Exceptions;
+using Kysect.DotnetProjectSystem.Tools;
 using Microsoft.Language.Xml;
 using System.Text;
 
@@ -13,31 +14,46 @@ public class XmlDocumentSyntaxFormatter
     {
         documentSyntax.ThrowIfNull();
 
-        IXmlElement updatedElement = UpdateElement(documentSyntax.Root, 0);
-        documentSyntax = documentSyntax.ReplaceNode(
-            documentSyntax.Root.AsSyntaxElement.AsNode,
-            updatedElement.AsSyntaxElement.AsNode);
+        List<XmlNodeSyntax> elements = documentSyntax
+            .Descendants()
+            .OfType<IXmlElement>()
+            .Select(x => x.AsSyntaxElement.AsNode)
+            .ToList();
+
+        documentSyntax =
+            documentSyntax
+                .ReplaceNodes(
+                    elements,
+                    (o, u) => UpdateElement(documentSyntax, (IXmlElement) o, (IXmlElement) u));
 
         return documentSyntax;
     }
 
-    private IXmlElement UpdateElement(IXmlElement currentElement, int depth)
+    private XmlNodeSyntax UpdateElement(XmlDocumentSyntax documentSyntax, IXmlElement oldNode, IXmlElement currentElement)
     {
         currentElement.ThrowIfNull();
 
+        int depth = CalculateDepth(documentSyntax, oldNode);
         currentElement = FormatAttributes(currentElement);
-        IXmlElementSyntax modified = currentElement.AsSyntaxElement;
-        modified = modified.RemoveAllChild();
+        currentElement = AddLeadingTrivia(depth, currentElement);
 
-        foreach (IXmlElement? element in currentElement.Elements)
+        return currentElement.AsSyntaxElement.AsNode;
+    }
+
+    private int CalculateDepth(XmlDocumentSyntax _, IXmlElement currentElement)
+    {
+        int depth = 0;
+
+        while (currentElement.Parent is not null)
         {
-            IXmlElement updatedElement = UpdateElement(element, depth + 1);
+            if (depth > 10)
+                throw new DotnetProjectSystemException("Cannot calculate XML element depth. Possible StackOverflow.");
 
-            modified = modified
-                .AddChild(updatedElement.AsSyntaxElement);
+            depth++;
+            currentElement = currentElement.Parent;
         }
 
-        return AddLeadingTrivia(depth, modified);
+        return depth;
     }
 
     private IXmlElement FormatAttributes(IXmlElement currentElement)
@@ -78,7 +94,7 @@ public class XmlDocumentSyntaxFormatter
         return currentElementSyntax.AsElement;
     }
 
-    private IXmlElement AddLeadingTrivia(int depth, IXmlElementSyntax modified)
+    private IXmlElement AddLeadingTrivia(int depth, IXmlElement modified)
     {
         if (modified is XmlEmptyElementSyntax xmlEmptyElementSyntax)
             return AddLeadingTrivia(depth, xmlEmptyElementSyntax);
