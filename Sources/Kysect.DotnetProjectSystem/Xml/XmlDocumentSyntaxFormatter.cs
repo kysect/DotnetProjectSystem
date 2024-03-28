@@ -34,8 +34,9 @@ public class XmlDocumentSyntaxFormatter
         currentElement.ThrowIfNull();
 
         int depth = CalculateDepth(documentSyntax, oldNode);
+        int originalNewLineCount = CalculateOriginalNewLineCount(currentElement);
         currentElement = FormatAttributes(currentElement);
-        currentElement = AddLeadingTrivia(depth, currentElement);
+        currentElement = AddLeadingTrivia(originalNewLineCount, depth, currentElement);
 
         return currentElement.AsSyntaxElement.AsNode;
     }
@@ -54,6 +55,19 @@ public class XmlDocumentSyntaxFormatter
         }
 
         return depth;
+    }
+
+    private int CalculateOriginalNewLineCount(IXmlElement currentElement)
+    {
+        int newLineCount = currentElement
+            .AsSyntaxElement
+            .AsNode
+            .GetLeadingTrivia()
+            .ToFullString()
+            .Split(new[] { Environment.NewLine }, StringSplitOptions.None)
+            .Length - 1;
+
+        return newLineCount;
     }
 
     private IXmlElement FormatAttributes(IXmlElement currentElement)
@@ -94,20 +108,20 @@ public class XmlDocumentSyntaxFormatter
         return currentElementSyntax.AsElement;
     }
 
-    private IXmlElement AddLeadingTrivia(int depth, IXmlElement modified)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, IXmlElement modified)
     {
         if (modified is XmlEmptyElementSyntax xmlEmptyElementSyntax)
-            return AddLeadingTrivia(depth, xmlEmptyElementSyntax);
+            return AddLeadingTrivia(originalNewLineCount, depth, xmlEmptyElementSyntax);
 
         if (modified is XmlElementSyntax xmlElementSyntax)
-            return AddLeadingTrivia(depth, xmlElementSyntax);
+            return AddLeadingTrivia(originalNewLineCount, depth, xmlElementSyntax);
 
         throw SwitchDefaultExceptions.OnUnexpectedType(modified);
     }
 
-    private IXmlElement AddLeadingTrivia(int depth, XmlEmptyElementSyntax xmlEmptyElementSyntax)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, XmlEmptyElementSyntax xmlEmptyElementSyntax)
     {
-        string trivia = GetTrivia(depth);
+        string trivia = GetTrivia(originalNewLineCount, depth);
 
         xmlEmptyElementSyntax = xmlEmptyElementSyntax.ReplaceNode(
             xmlEmptyElementSyntax.LessThanToken,
@@ -116,9 +130,10 @@ public class XmlDocumentSyntaxFormatter
         return xmlEmptyElementSyntax;
     }
 
-    private IXmlElement AddLeadingTrivia(int depth, XmlElementSyntax xmlElementSyntax)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, XmlElementSyntax xmlElementSyntax)
     {
-        string trivia = GetTrivia(depth);
+        string openNodeTrivia = GetTrivia(originalNewLineCount, depth);
+        string closeNodeTrivia = GetTrivia(1, depth);
 
         // TODO: remove this hack for first node
         bool needTriviaForStartTag = depth != 0;
@@ -126,7 +141,7 @@ public class XmlDocumentSyntaxFormatter
         {
             xmlElementSyntax = xmlElementSyntax.ReplaceNode(
                 xmlElementSyntax.StartTag,
-                xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia)));
+                xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(openNodeTrivia)));
         }
 
         bool needTriviaForEndTag = xmlElementSyntax.Elements.Any();
@@ -134,16 +149,20 @@ public class XmlDocumentSyntaxFormatter
         {
             xmlElementSyntax = xmlElementSyntax.ReplaceNode(
                 xmlElementSyntax.EndTag,
-                xmlElementSyntax.EndTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(trivia)));
+                xmlElementSyntax.EndTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(closeNodeTrivia)));
 
         }
 
         return xmlElementSyntax;
     }
 
-    private string GetTrivia(int depth)
+    private string GetTrivia(int originalNewLineCount, int depth)
     {
-        var sb = new StringBuilder(Environment.NewLine);
+        var sb = new StringBuilder();
+
+        int newLineCount = Math.Max(originalNewLineCount, 1);
+        for (int i = 0; i < newLineCount; i++)
+            sb = sb.AppendLine();
 
         for (int i = 0; i < depth; i++)
             sb = sb.Append(DefaultIndention);

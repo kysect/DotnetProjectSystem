@@ -187,6 +187,24 @@ public class XmlDocumentSyntaxFormatterTests
         Validate(input, input);
     }
 
+    [Fact]
+    public void Format_FileWithEmptyLine_ExpectNoChanges()
+    {
+        var input = """
+                    <Project>
+                      <PropertyGroup>
+                        <IncludeSymbols>true</IncludeSymbols>
+                      </PropertyGroup>
+                    
+                      <PropertyGroup>
+                        <IncludeSymbols>true</IncludeSymbols>
+                      </PropertyGroup>
+                    </Project>
+                    """;
+
+        Validate(input, input);
+    }
+
     private void Validate(string input, string expected)
     {
         XmlDocumentSyntax document = Parser.ParseText(input);
