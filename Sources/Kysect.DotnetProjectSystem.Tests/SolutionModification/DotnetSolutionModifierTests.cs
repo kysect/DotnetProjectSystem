@@ -1,9 +1,11 @@
 ﻿using Kysect.DotnetProjectSystem.FileStructureBuilding;
 using Kysect.DotnetProjectSystem.Parsing;
+using Kysect.DotnetProjectSystem.Projects;
 using Kysect.DotnetProjectSystem.SolutionModification;
 using Kysect.DotnetProjectSystem.Tests.Asserts;
 using Kysect.DotnetProjectSystem.Tools;
 using Kysect.DotnetProjectSystem.Xml;
+using Microsoft.Language.Xml;
 using System.IO.Abstractions.TestingHelpers;
 
 namespace Kysect.DotnetProjectSystem.Tests.SolutionModification;
@@ -80,6 +82,33 @@ public class DotnetSolutionModifierTests
 
         _fileSystemAsserts
             .File(SolutionItemNameConstants.DirectoryBuildProps)
+            .ShouldExists()
+            .ShouldHaveContent(expectedContent);
+    }
+
+    [Fact]
+    public void Save_AfterModifyDirectoryBuildTargets_FileSaved()
+    {
+        var expectedContent = """
+                              <Project>
+                                <NewNode></NewNode>
+                              </Project>
+                              """;
+
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .AddDirectoryBuildTargets(DirectoryBuildTargetFile.CreateEmpty())
+            .Save(_currentPath);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+        solutionModifier
+            .GetOrCreateDirectoryBuildTargetFile()
+            .UpdateDocument(d => d.ReplaceNode(
+                d.Root.AsSyntaxElement.AsNode,
+                d.Root.AsSyntaxElement.AddChild(ExtendedSyntaxFactory.XmlElement("NewNode")).AsNode));
+        solutionModifier.Save();
+
+        _fileSystemAsserts
+            .File(SolutionItemNameConstants.DirectoryBuildTargets)
             .ShouldExists()
             .ShouldHaveContent(expectedContent);
     }

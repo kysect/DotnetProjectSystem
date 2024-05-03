@@ -134,4 +134,23 @@ public class DotnetSolutionModifierFactoryTests
             .ToXmlString(_syntaxFormatter)
             .Should().Be(directoryBuildTargetContent);
     }
+
+    [Fact]
+    public void Create_SolutionWithoutDirectoryBuildTargets_ReturnEmptyTargetFileContent()
+    {
+        string directoryBuildTargetContent = """
+                                             <Project>
+                                             </Project>
+                                             """;
+
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .Save(_currentPath);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+
+        solutionModifier
+            .GetOrCreateDirectoryBuildTargetFile()
+            .ToXmlString(_syntaxFormatter)
+            .Should().Be(directoryBuildTargetContent);
+    }
 }
