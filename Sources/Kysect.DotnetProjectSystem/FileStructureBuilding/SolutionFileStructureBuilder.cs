@@ -16,6 +16,7 @@ public class SolutionFileStructureBuilder
     private readonly List<SolutionStructureElement> _files;
     private DirectoryBuildPropsFile? _directoryBuildPropsFile;
     private DirectoryPackagesPropsFile? _directoryPackagesPropsFile;
+    private DirectoryBuildTargetFile? _directoryBuildTargetFile;
 
     public SolutionFileStructureBuilder(IFileSystem fileSystem, XmlDocumentSyntaxFormatter syntaxFormatter, string solutionName)
     {
@@ -66,11 +67,22 @@ public class SolutionFileStructureBuilder
         return this;
     }
 
+    public SolutionFileStructureBuilder AddDirectoryBuildTargets(string content)
+    {
+        return AddDirectoryBuildTargets(DirectoryBuildTargetFile.Create(content));
+    }
+
+    public SolutionFileStructureBuilder AddDirectoryBuildTargets(DirectoryBuildTargetFile directoryBuildTargetFile)
+    {
+        _directoryBuildTargetFile = directoryBuildTargetFile;
+        return this;
+    }
+
     public void Save(string solutionDirectory)
     {
         string solutionFileContent = CreateSolutionFile(_fileSystem);
 
-        DirectoryExtensions.EnsureDirectoryExists(_fileSystem, solutionDirectory);
+        _fileSystem.EnsureDirectoryExists(solutionDirectory);
         _fileSystem.File.WriteAllText(_fileSystem.Path.Combine(solutionDirectory, $"{_solutionName}.sln"), solutionFileContent);
 
         if (_directoryBuildPropsFile is not null)
@@ -78,6 +90,9 @@ public class SolutionFileStructureBuilder
 
         if (_directoryPackagesPropsFile is not null)
             AddFile([SolutionItemNameConstants.DirectoryPackagesProps], _directoryPackagesPropsFile.File.ToXmlString(_syntaxFormatter));
+
+        if (_directoryBuildTargetFile is not null)
+            AddFile([SolutionItemNameConstants.DirectoryBuildTargets], _directoryBuildTargetFile.ToXmlString(_syntaxFormatter));
 
         foreach (SolutionStructureElement? solutionFileInfo in _files)
         {

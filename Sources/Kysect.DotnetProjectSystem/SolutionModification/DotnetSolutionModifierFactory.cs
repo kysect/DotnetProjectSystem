@@ -28,12 +28,14 @@ public class DotnetSolutionModifierFactory
 
         DirectoryBuildPropsFile? directoryBuildPropsModifier = TryCreateDirectoryBuildPropsFile(solutionFileInfo);
         DirectoryPackagesPropsFile? directoryPackagesPropsFile = TryCreateDirectoryPackagesPropsFile(solutionFileInfo);
+        DirectoryBuildTargetFile? directoryBuildTargetsFile = TryCreateDirectoryBuildTargetsFile(solutionFileInfo);
         Dictionary<string, DotnetCsprojFile> projects = CreateProjectModifiers(solutionFileInfo);
 
         return new DotnetSolutionModifier(
             projects,
             directoryBuildPropsModifier,
             directoryPackagesPropsFile,
+            directoryBuildTargetsFile,
             _fileSystem,
             solutionFileInfo,
             _syntaxFormatter);
@@ -61,6 +63,22 @@ public class DotnetSolutionModifierFactory
 
         DotnetProjectFile dotnetProjectFile = Create(path, _fileSystem);
         return new DirectoryPackagesPropsFile(dotnetProjectFile);
+    }
+
+    private DirectoryBuildTargetFile? TryCreateDirectoryBuildTargetsFile(IFileInfo solutionFileInfo)
+    {
+        solutionFileInfo.Directory.ThrowIfNull();
+
+        string path = _fileSystem.Path.Combine(solutionFileInfo.Directory.FullName, SolutionItemNameConstants.DirectoryBuildTargets);
+        if (!_fileSystem.File.Exists(path))
+            return null;
+
+        string fileContent =
+            _fileSystem.File.Exists(path)
+                ? _fileSystem.File.ReadAllText(path)
+                : string.Empty;
+
+        return DirectoryBuildTargetFile.Create(fileContent);
     }
 
     private Dictionary<string, DotnetCsprojFile> CreateProjectModifiers(IFileInfo solutionFileInfo)

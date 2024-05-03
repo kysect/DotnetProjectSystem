@@ -109,4 +109,29 @@ public class DotnetSolutionModifierFactoryTests
             .ToXmlString(_syntaxFormatter)
             .Should().Be(directoryPackagesPropsContent);
     }
+
+    [Fact]
+    public void Create_SolutionWithDirectoryBuildTargets_ReturnTargetFileContent()
+    {
+        string directoryBuildTargetContent = """
+                                             <Project>
+                                               <Target Name="SomeTargetName" BeforeTargets="BeforeBuild">
+                                                 <PropertyGroup Condition="'$(SomeProperty)' == 'true'">
+                                                   <SomeProperty>false</SomeProperty>
+                                                 </PropertyGroup>
+                                               </Target>
+                                             </Project>
+                                             """;
+
+        _solutionFileStructureBuilderFactory.Create("Solution")
+            .AddDirectoryBuildTargets(directoryBuildTargetContent)
+            .Save(_currentPath);
+
+        DotnetSolutionModifier solutionModifier = _solutionModifierFactory.Create("Solution.sln");
+
+        solutionModifier
+            .GetOrCreateDirectoryBuildTargetFile()
+            .ToXmlString(_syntaxFormatter)
+            .Should().Be(directoryBuildTargetContent);
+    }
 }

@@ -13,6 +13,7 @@ public class DotnetSolutionModifier
     private readonly IFileSystem _fileSystem;
     private DirectoryBuildPropsFile? _directoryBuildPropsModifier;
     private DirectoryPackagesPropsFile? _directoryPackagePropsModifier;
+    private DirectoryBuildTargetFile? _directoryBuildTargetFile;
     private readonly Dictionary<string, DotnetCsprojFile> _projects;
 
     public IReadOnlyCollection<KeyValuePair<string, DotnetCsprojFile>> Projects => _projects;
@@ -29,10 +30,17 @@ public class DotnetSolutionModifier
         return _directoryPackagePropsModifier;
     }
 
+    public DirectoryBuildTargetFile GetOrCreateDirectoryBuildTargetFile()
+    {
+        _directoryBuildTargetFile ??= DirectoryBuildTargetFile.CreateEmpty();
+        return _directoryBuildTargetFile;
+    }
+
     public DotnetSolutionModifier(
         Dictionary<string, DotnetCsprojFile> projects,
         DirectoryBuildPropsFile? directoryBuildPropsModifier,
         DirectoryPackagesPropsFile? directoryPackagePropsModifier,
+        DirectoryBuildTargetFile? directoryBuildTargetsFile,
         IFileSystem fileSystem,
         IFileInfo solutionPath,
         XmlDocumentSyntaxFormatter syntaxFormatter)
@@ -40,6 +48,7 @@ public class DotnetSolutionModifier
         _projects = projects;
         _directoryBuildPropsModifier = directoryBuildPropsModifier;
         _directoryPackagePropsModifier = directoryPackagePropsModifier;
+        _directoryBuildTargetFile = directoryBuildTargetsFile;
         _fileSystem = fileSystem;
         _solutionPath = solutionPath;
         _syntaxFormatter = syntaxFormatter;
@@ -59,6 +68,12 @@ public class DotnetSolutionModifier
         {
             string directoryPackagesPropsPath = _fileSystem.Path.Combine(_solutionPath.Directory.FullName, SolutionItemNameConstants.DirectoryPackagesProps);
             _fileSystem.File.WriteAllText(directoryPackagesPropsPath, _directoryPackagePropsModifier.File.ToXmlString(_syntaxFormatter));
+        }
+
+        if (_directoryBuildTargetFile is not null)
+        {
+            string directoryPackagesPropsPath = _fileSystem.Path.Combine(_solutionPath.Directory.FullName, SolutionItemNameConstants.DirectoryBuildTargets);
+            _fileSystem.File.WriteAllText(directoryPackagesPropsPath, _directoryBuildTargetFile.ToXmlString(_syntaxFormatter));
         }
 
         foreach (KeyValuePair<string, DotnetCsprojFile> projectModifier in _projects)
