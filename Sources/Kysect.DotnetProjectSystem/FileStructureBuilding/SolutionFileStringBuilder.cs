@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Kysect.DotnetProjectSystem.Projects;
+using System.Text;
 
 namespace Kysect.DotnetProjectSystem.FileStructureBuilding;
 
@@ -35,9 +36,13 @@ public class SolutionFileStringBuilder
 
     public SolutionFileStringBuilder AddProject(string projectName, string projectPath)
     {
-        // TODO: Generate some default project type ID
+        return AddProject(DotnetProjectTypeIds.DefaultLibrary, projectName, projectPath, Guid.NewGuid());
+    }
+
+    public SolutionFileStringBuilder AddProject(Guid projectTypeId, string projectName, string projectPath, Guid projectId)
+    {
         string projectDefinition = $$"""
-                                     Project("{{{Guid.Empty}}}") = "{{projectName}}", "{{projectPath}}", "{{{Guid.NewGuid()}}}"
+                                     Project("{{{projectTypeId}}}") = "{{projectName}}", "{{projectPath}}", "{{{projectId}}}"
                                      EndProject
                                      """;
 
