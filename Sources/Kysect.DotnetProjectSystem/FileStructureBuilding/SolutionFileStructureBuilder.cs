@@ -47,7 +47,7 @@ public class SolutionFileStructureBuilder
 
     public SolutionFileStructureBuilder AddDirectoryBuildProps(string content)
     {
-        return AddDirectoryBuildProps(new DirectoryBuildPropsFile(DotnetProjectFile.Create(content)));
+        return AddDirectoryBuildProps(new DirectoryBuildPropsFile(content));
     }
 
     public SolutionFileStructureBuilder AddDirectoryBuildProps(DirectoryBuildPropsFile directoryBuildPropsFile)

@@ -43,7 +43,7 @@ public class SolutionFileStructureBuilderTests
     {
         string solutionName = "MySolution";
         string content = "<Project></Project>";
-        var directoryBuildPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(content));
+        var directoryBuildPropsFile = new DirectoryBuildPropsFile(content);
 
         _solutionFileStructureBuilderFactory.Create(solutionName)
             .AddDirectoryBuildProps(directoryBuildPropsFile)

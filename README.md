@@ -3,99 +3,107 @@
 [![codecov](https://codecov.io/gh/kysect/DotnetProjectSystem/graph/badge.svg?token=eRI09WyDsH)](https://codecov.io/gh/kysect/DotnetProjectSystem)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fkysect%2FDotnetProjectSystem%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/kysect/DotnetProjectSystem/master)
 
-DotnetProjectSystem is a nuget package for working with .sln, .csproj and .props files: parsing, modifying and generating.
+DotnetProjectSystem is a nuget package for working with .sln, .csproj and .props files.
 
-## Generating
+### Main features
 
-This code samples:
+- Creating solution and project files structure from code, fluent API
+- Parsing solution and project files
+- Typed wrappers for reading and modifying solution and project files
+- API for modifying solution and project files. Implementation of strategy for migration solution to Central Package Management
+- Support of [TestableIO.System.IO.Abstractions](https://github.com/TestableIO/System.IO.Abstractions) for testing
+
+### Creating solution and project files structure
+
+- Task: create solution file, project files and Directory.Build.props file.
+- Use case: need to create sample solution for test proposes (on real file system or MockFileSystem).
+
+Code sample for creating solution and project files structure:
 
 ```csharp
-var factory = new SolutionFileStructureBuilderFactory(_fileSystem, _syntaxFormatter);
+var factory = new SolutionFileStructureBuilderFactory(fileSystem, syntaxFormatter);
 
-factory
-    .Create(solutionName)
-    .AddProject(
-        new ProjectFileStructureBuilder("Project")
-            .SetContent("<Project></Project>"))
-    .AddFile(new SolutionFileInfo(["Directory.Build.props"], "<Project></Project>"))
-    .Save("C:\\Repositories\\");
+var project =
+    new ProjectFileStructureBuilder("FirstProject")
+        .SetContent("""
+                    <Project>
+                      <PropertyGroup>
+                        <TargetFramework>net8.0</TargetFramework>
+                      </PropertyGroup>
+                    </Project>
+                    """)
+        .AddFile(["Models", "MyModel.cs"], "using System;");
+
+var directoryBuildPropsFile = DirectoryBuildPropsFile.CreateEmpty();
+directoryBuildPropsFile.File.Properties.SetProperty("Company", "Kysect");
+
+factory.Create("NewSolution")
+    .AddProject(project)
+    .AddDirectoryBuildProps(directoryBuildPropsFile)
+    .Save(@"D:\Repositories\NewSolution");
 ```
 
 will create this file structure:
 
 ```
-- ./
-    - Project/
-        - Project.csproj
-    - MySolution.sln
-    - Directory.Build.props
+D:\Repositories\NewSolution\
+|- FirstProject/
+   |- FirstProject.csproj
+   |- Models
+      |- MyModel.cs
+|- Directory.Build.props
+|- NewSolution.sln
 ```
 
-## Parsing
+### Parsing solution and project files
 
 Nuget provide API for parsing .sln and .csproj files:
 
 ```csharp
 string solutionFilePath = ...;
-DotnetSolutionParser parser = new DotnetSolutionParser(_fileSystem, logger);
-DotnetSolutionDescriptor result = parser.ParseContent(solutionFilePath);
-
-// result.FilePath == C:\Solution\Solution.sln
-// result.Projects ==
-// {
-//    { "C:\Solution\Project.csproj", <DotnetProjectFile> }
-// }
+var parser = new DotnetSolutionParser(_fileSystem, logger);
+var result = parser.Parse(solutionFilePath);
 ```
 
-## Modification
+Parse method return model DotnetSolutionDescriptor that contains information about projects. Project represented by DotnetProjectFile model that provide access to project properties and items.
 
-Nuget provide API for modification of parsed solution. Sample of modification;
+### Typed wrappers for reading and modifying solution and project files
+
+Some samples for working with DotnetProjectFile:
 
 ```csharp
-syntaxFormatter = new XmlDocumentSyntaxFormatter();
-DotnetSolutionModifier solutionModifier = solutionModifierFactory.Create("Solution.sln");
+DotnetProjectFile project = ...;
+var packageReferences = project.PackageReferences.GetPackageReferences();
+// packageReferences = { { "System.Text.Json", "8.0.0" }, { "Microsoft.Extensions.Logging", "8.0.0" } }
 
-solutionModifier
-    .GetOrCreateDirectoryPackagePropsModifier()
-    .SetCentralPackageManagement(true);
+project.PackageReferences.SetPackageReference("System.Text.Json", "9.0.0");
+// packageReferences = { { "System.Text.Json", "9.0.0" }, { "Microsoft.Extensions.Logging", "8.0.0" }
 
-solutionModifier.Save(syntaxFormatter)
+project.PackageReferences.AddPackageReference("Kysect.Editorconfig", "1.0.0");
+
+var implicitUsings = project.Properties.GetProperty("ImplicitUsings");
+// implicitUsings = true
+project.Properties.SetProperty("ImplicitUsings", "false");
+// implicitUsings = false
 ```
 
-This code will add `<ManagePackageVersionsCentrally>` to `Directory.Package.props` file.
+### API for modifying solution and project files
 
-For this modification was introduces strategy that describe modification:
+Nuget provide API for modification of parsed solution. NuGet package shipped with implementation of strategy for migration solution to Central Package Management as sample.
 
 ```csharp
-public class SetTargetFrameworkModifyStrategy(string value) : IXmlProjectFileModifyStrategy<XmlElementSyntax>
-{
-    public IReadOnlyCollection<XmlElementSyntax> SelectNodeForModify(XmlDocumentSyntax document)
-    {
-        document.ThrowIfNull();
+string solutionFilePath = ...;
+var factory = new DotnetSolutionModifierFactory(_fileSystem, _solutionFileContentParser, _formatter);
+var solutionModifier = _solutionModifierFactory.Create(solutionFilePath);
+var migrator = new CentralPackageManagementMigrator(logger);
 
-        return document
-            .GetNodesByName("TargetFramework")
-            .OfType<XmlElementSyntax>()
-            .ToList();
-    }
-
-    public SyntaxNode ApplyChanges(XmlElementSyntax syntax)
-    {
-        syntax.ThrowIfNull();
-
-        XmlTextSyntax content = SyntaxFactory.XmlText(SyntaxFactory.XmlTextLiteralToken(value, null, null));
-        return syntax.ReplaceNode(syntax.Content.Single(), content);
-    }
-}
+migrator.Migrate(solutionModifier);
 ```
 
-And this strategy applied to solutions:
+### Support of TestableIO.System.IO.Abstractions
 
-```csharp
-DotnetSolutionModifier solutionModifier = solutionModifierFactory.Create("Solution.sln");
+TestableIO.System.IO.Abstractions is NuGet that provide abstraction for file system. This abstraction can be used for testing. Nuget provide implementation of IFileSystem for TestableIO.System.IO.Abstractions. Kysect.DotnetProjectSystem fully support this abstraction.
 
-foreach (DotnetProjectModifier solutionModifierProject in solutionModifier.Projects)
-    solutionModifierProject.File.UpdateDocument(new SetTargetFrameworkModifyStrategy("net9.0"));
+## Used by
 
-solutionModifier.Save(syntaxFormatter);
-```
+Currently main use case for this library is https://github.com/kysect/Zeya - tool for managing .NET projects and modification them. You can check it for more examples of using this library.
