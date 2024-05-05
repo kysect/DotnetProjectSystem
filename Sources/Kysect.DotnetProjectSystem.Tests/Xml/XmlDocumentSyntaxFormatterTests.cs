@@ -205,6 +205,17 @@ public class XmlDocumentSyntaxFormatterTests
         Validate(input, input);
     }
 
+    [Fact]
+    public void Format_OneEmptyXmlElement_NoChanges()
+    {
+        var input = """
+                    <Project />
+                    """;
+
+        Validate(input, input);
+    }
+
+
     private void Validate(string input, string expected)
     {
         XmlDocumentSyntax document = Parser.ParseText(input);
