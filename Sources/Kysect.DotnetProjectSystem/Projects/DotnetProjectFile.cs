@@ -87,7 +87,6 @@ public class DotnetProjectFile
         elementName.ThrowIfNull();
 
         IXmlElement projectNode = GetProjectNode();
-        // TODO: add API for returning more than one group
         IXmlElementSyntax? propertyGroupNode = projectNode
             .AsSyntaxElement
             .Descendants()

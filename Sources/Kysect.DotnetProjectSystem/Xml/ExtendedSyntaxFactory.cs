@@ -36,7 +36,6 @@ public static class ExtendedSyntaxFactory
             SyntaxFactory.Punctuation(SyntaxKind.SlashGreaterThanToken, "/>", SyntaxFactory.WhitespaceTrivia(" "), null));
     }
 
-    // TODO: move formatting to Formatter
     public static XmlAttributeSyntax XmlAttribute(string key, string value)
     {
         return SyntaxFactory.XmlAttribute(

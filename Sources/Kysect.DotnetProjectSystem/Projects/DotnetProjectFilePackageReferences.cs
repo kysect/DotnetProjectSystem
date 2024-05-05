@@ -5,43 +5,36 @@ using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
-public class DotnetProjectFilePackageReferences
+public class DotnetProjectFilePackageReferences(DotnetProjectFile projectFile)
 {
-    private readonly DotnetProjectFile _projectFile;
-
-    public DotnetProjectFilePackageReferences(DotnetProjectFile projectFile)
-    {
-        _projectFile = projectFile;
-    }
-
     public DotnetProjectFile AddPackageReference(string name)
     {
-        IXmlElementSyntax itemGroup = _projectFile.GetOrAddItemGroup();
+        IXmlElementSyntax itemGroup = projectFile.GetOrAddItemGroup();
         IXmlElementSyntax packageReference = ExtendedSyntaxFactory
             .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
             .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name));
 
-        _projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
-        return _projectFile;
+        projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
+        return projectFile;
     }
 
     public DotnetProjectFile AddPackageReference(string name, string version)
     {
-        IXmlElementSyntax itemGroup = _projectFile.GetOrAddItemGroup();
+        IXmlElementSyntax itemGroup = projectFile.GetOrAddItemGroup();
         IXmlElementSyntax packageReference = ExtendedSyntaxFactory
             .XmlEmptyElement(DotnetProjectFileConstant.PackageReference)
             .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Include", name))
             .AddAttribute(ExtendedSyntaxFactory.XmlAttribute("Version", version));
 
-        _projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
-        return _projectFile;
+        projectFile.AddChildAndUpdateDocument(itemGroup, packageReference);
+        return projectFile;
     }
 
     public IReadOnlyCollection<ProjectPackageReference> GetPackageReferences()
     {
         var result = new List<ProjectPackageReference>();
 
-        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        foreach (IXmlElementSyntax xmlElementSyntax in projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
         {
             XmlAttributeSyntax nameAttribute = xmlElementSyntax.GetAttribute("Include").ThrowIfNull();
             XmlAttributeSyntax? versionAttribute = xmlElementSyntax.GetAttribute("Version");
@@ -59,7 +52,7 @@ public class DotnetProjectFilePackageReferences
     {
         var nodes = new List<SyntaxNode>();
 
-        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        foreach (IXmlElementSyntax xmlElementSyntax in projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
         {
             XmlAttributeSyntax nameAttribute = xmlElementSyntax.GetAttribute("Include").ThrowIfNull();
 
@@ -69,12 +62,12 @@ public class DotnetProjectFilePackageReferences
             nodes.Add(xmlElementSyntax.AsNode);
         }
 
-        _projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
+        projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
     }
 
     public void SetPackageReference(string name, string version)
     {
-        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        foreach (IXmlElementSyntax xmlElementSyntax in projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
         {
             XmlAttributeSyntax nameAttribute = xmlElementSyntax.GetAttribute("Include").ThrowIfNull();
             if (nameAttribute.Value != name)
@@ -82,7 +75,7 @@ public class DotnetProjectFilePackageReferences
 
             XmlAttributeSyntax versionAttribute = xmlElementSyntax.GetAttribute("Version").ThrowIfNull();
             XmlAttributeSyntax? changedVersionAttribute = versionAttribute.WithValue(ExtendedSyntaxFactory.XmlString(version));
-            _projectFile.UpdateDocument(d => d.ReplaceNode(versionAttribute, changedVersionAttribute));
+            projectFile.UpdateDocument(d => d.ReplaceNode(versionAttribute, changedVersionAttribute));
 
             return;
         }
@@ -90,7 +83,7 @@ public class DotnetProjectFilePackageReferences
 
     public void RemoveVersion(string name)
     {
-        foreach (IXmlElementSyntax xmlElementSyntax in _projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
+        foreach (IXmlElementSyntax xmlElementSyntax in projectFile.GetNodesByName(DotnetProjectFileConstant.PackageReference))
         {
             XmlAttributeSyntax nameAttribute = xmlElementSyntax.GetAttribute("Include").ThrowIfNull();
             if (nameAttribute.Value != name)
@@ -98,7 +91,7 @@ public class DotnetProjectFilePackageReferences
 
             XmlAttributeSyntax versionAttribute = xmlElementSyntax.GetAttribute("Version").ThrowIfNull();
             IXmlElementSyntax changedElement = xmlElementSyntax.RemoveAttribute(versionAttribute);
-            _projectFile.UpdateDocument(d => d.ReplaceNode(xmlElementSyntax.AsNode, changedElement.AsNode));
+            projectFile.UpdateDocument(d => d.ReplaceNode(xmlElementSyntax.AsNode, changedElement.AsNode));
 
             return;
         }

@@ -18,24 +18,6 @@ public class DotnetSolutionModifier
 
     public IReadOnlyCollection<KeyValuePair<string, DotnetCsprojFile>> Projects => _projects;
 
-    public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
-    {
-        _directoryBuildPropsModifier ??= new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
-        return _directoryBuildPropsModifier;
-    }
-
-    public DirectoryPackagesPropsFile GetOrCreateDirectoryPackagePropsModifier()
-    {
-        _directoryPackagePropsModifier ??= new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
-        return _directoryPackagePropsModifier;
-    }
-
-    public DirectoryBuildTargetFile GetOrCreateDirectoryBuildTargetFile()
-    {
-        _directoryBuildTargetFile ??= DirectoryBuildTargetFile.CreateEmpty();
-        return _directoryBuildTargetFile;
-    }
-
     public DotnetSolutionModifier(
         Dictionary<string, DotnetCsprojFile> projects,
         DirectoryBuildPropsFile? directoryBuildPropsModifier,
@@ -52,6 +34,24 @@ public class DotnetSolutionModifier
         _fileSystem = fileSystem;
         _solutionPath = solutionPath;
         _syntaxFormatter = syntaxFormatter;
+    }
+
+    public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
+    {
+        _directoryBuildPropsModifier ??= new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
+        return _directoryBuildPropsModifier;
+    }
+
+    public DirectoryPackagesPropsFile GetOrCreateDirectoryPackagePropsModifier()
+    {
+        _directoryPackagePropsModifier ??= new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
+        return _directoryPackagePropsModifier;
+    }
+
+    public DirectoryBuildTargetFile GetOrCreateDirectoryBuildTargetFile()
+    {
+        _directoryBuildTargetFile ??= DirectoryBuildTargetFile.CreateEmpty();
+        return _directoryBuildTargetFile;
     }
 
     public void Save()
