@@ -5,22 +5,16 @@ using Microsoft.Language.Xml;
 
 namespace Kysect.DotnetProjectSystem.Projects;
 
-public class DotnetProjectFileProperties
+public class DotnetProjectFileProperties(DotnetProjectFile projectFile)
 {
-    private readonly DotnetProjectFile _projectFile;
-
-    public DotnetProjectFileProperties(DotnetProjectFile projectFile)
+    public bool? FindEnableDefaultItems()
     {
-        _projectFile = projectFile;
+        return FindBooleanProperty(DotnetProjectFileConstant.EnableDefaultItems);
     }
 
-    public bool IsEnableDefaultItems()
+    public bool GetEnableDefaultItemsOrDefault()
     {
-        bool? enableDefaultItems = FindBooleanProperty(DotnetProjectFileConstant.EnableDefaultItems);
-        if (enableDefaultItems is not null)
-            return enableDefaultItems.Value;
-
-        return _projectFile.IsSdkFormat();
+        return FindEnableDefaultItems() ?? projectFile.IsSdkFormat();
     }
 
     public bool? FindBooleanProperty(string propertyName)
@@ -39,7 +33,7 @@ public class DotnetProjectFileProperties
 
     public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
     {
-        return _projectFile
+        return projectFile
             .GetNodesByName(property)
             .Select(xmlElementSyntax => new DotnetProjectProperty(property, xmlElementSyntax.Content.ToFullString()))
             .ToList();
@@ -75,7 +69,7 @@ public class DotnetProjectFileProperties
 
     public DotnetProjectFileProperties SetProperty(string name, string value)
     {
-        IReadOnlyCollection<IXmlElementSyntax> properties = _projectFile.GetNodesByName(name);
+        IReadOnlyCollection<IXmlElementSyntax> properties = projectFile.GetNodesByName(name);
         if (properties.Count == 0)
             return AddProperty(name, value);
 
@@ -85,24 +79,24 @@ public class DotnetProjectFileProperties
         IXmlElementSyntax elementSyntax = properties.Single();
         IXmlElementSyntax changedElement = elementSyntax.WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));
 
-        _projectFile.UpdateDocument(d => d.ReplaceNode(elementSyntax.AsNode, changedElement.AsNode));
+        projectFile.UpdateDocument(d => d.ReplaceNode(elementSyntax.AsNode, changedElement.AsNode));
         return this;
     }
 
     public DotnetProjectFileProperties AddProperty(string name, string value)
     {
-        IXmlElementSyntax propertyGroup = _projectFile.GetOrAddPropertyGroup();
+        IXmlElementSyntax propertyGroup = projectFile.GetOrAddPropertyGroup();
         XmlElementSyntax propertyElement = ExtendedSyntaxFactory
             .XmlEmptyElement(name)
             .WithContent(ExtendedSyntaxFactory.XmlPropertyContent(value));
 
-        _projectFile.AddChildAndUpdateDocument(propertyGroup, propertyElement);
+        projectFile.AddChildAndUpdateDocument(propertyGroup, propertyElement);
         return this;
     }
 
     public DotnetProjectFileProperties RemoveProperty(string name)
     {
-        IReadOnlyCollection<IXmlElementSyntax> properties = _projectFile.GetNodesByName(name);
+        IReadOnlyCollection<IXmlElementSyntax> properties = projectFile.GetNodesByName(name);
 
         if (properties.Count == 0)
             return this;
@@ -111,7 +105,7 @@ public class DotnetProjectFileProperties
             .Select(p => p.AsNode)
             .ToList();
 
-        _projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
+        projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
         return this;
     }
 }
