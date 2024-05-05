@@ -7,6 +7,11 @@ public class DirectoryPackagesPropsFile
     public DotnetProjectFile File { get; }
     public DirectoryPackagesPropsVersions Versions { get; }
 
+    public static DirectoryPackagesPropsFile CreateEmpty()
+    {
+        return new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
+    }
+
     public DirectoryPackagesPropsFile(DotnetProjectFile file)
     {
         File = file;

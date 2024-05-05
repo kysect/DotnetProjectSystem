@@ -38,13 +38,13 @@ public class DotnetSolutionModifier
 
     public DirectoryBuildPropsFile GetOrCreateDirectoryBuildPropsModifier()
     {
-        _directoryBuildPropsModifier ??= new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
+        _directoryBuildPropsModifier ??= DirectoryBuildPropsFile.CreateEmpty();
         return _directoryBuildPropsModifier;
     }
 
     public DirectoryPackagesPropsFile GetOrCreateDirectoryPackagePropsModifier()
     {
-        _directoryPackagePropsModifier ??= new DirectoryPackagesPropsFile(DotnetProjectFile.CreateEmpty());
+        _directoryPackagePropsModifier ??= DirectoryPackagesPropsFile.CreateEmpty();
         return _directoryPackagePropsModifier;
     }
 

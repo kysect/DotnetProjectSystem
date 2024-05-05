@@ -4,6 +4,15 @@ public class DirectoryBuildPropsFile
 {
     public DotnetProjectFile File { get; }
 
+    public static DirectoryBuildPropsFile CreateEmpty()
+    {
+        return new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
+    }
+
+    public DirectoryBuildPropsFile(string fileContent) : this(DotnetProjectFile.Create(fileContent))
+    {
+    }
+
     public DirectoryBuildPropsFile(DotnetProjectFile file)
     {
         File = file;

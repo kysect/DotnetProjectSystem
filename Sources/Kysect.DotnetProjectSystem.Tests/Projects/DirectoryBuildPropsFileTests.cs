@@ -20,7 +20,7 @@ public class DirectoryBuildPropsFileTests
                              </Project>
                              """;
 
-        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(input));
+        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(input);
 
         bool actual = directoryPackagesPropsFile.ArtifactsOutputEnabled();
 
@@ -38,7 +38,7 @@ public class DirectoryBuildPropsFileTests
                              </Project>
                              """;
 
-        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(input));
+        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(input);
 
         bool actual = directoryPackagesPropsFile.ArtifactsOutputEnabled();
 
@@ -56,7 +56,7 @@ public class DirectoryBuildPropsFileTests
                              </Project>
                              """;
 
-        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.Create(input));
+        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(input);
 
         bool actual = directoryPackagesPropsFile.ArtifactsOutputEnabled();
 
@@ -74,7 +74,7 @@ public class DirectoryBuildPropsFileTests
                              </Project>
                              """;
 
-        var directoryPackagesPropsFile = new DirectoryBuildPropsFile(DotnetProjectFile.CreateEmpty());
+        var directoryPackagesPropsFile = DirectoryBuildPropsFile.CreateEmpty();
 
         directoryPackagesPropsFile.SetArtifactsOutput(true);
 
