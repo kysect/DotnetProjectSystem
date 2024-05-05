@@ -14,10 +14,8 @@ public class ProjectFileStructureBuilder
     public string ProjectName { get; }
 
     public ProjectFileStructureBuilder(string projectName)
+        : this(projectName, DotnetProjectFile.CreateEmpty())
     {
-        ProjectName = projectName;
-        _files = new List<SolutionStructureElement>();
-        _projectFile = DotnetProjectFile.CreateEmpty();
     }
 
     public ProjectFileStructureBuilder(string projectName, string projectFileContent)
@@ -25,9 +23,11 @@ public class ProjectFileStructureBuilder
     {
     }
 
-    public ProjectFileStructureBuilder(string projectName, DotnetProjectFile projectFileContent) : this(projectName)
+    public ProjectFileStructureBuilder(string projectName, DotnetProjectFile projectFileContent)
     {
+        ProjectName = projectName;
         _projectFile = projectFileContent;
+        _files = new List<SolutionStructureElement>();
     }
 
     public ProjectFileStructureBuilder SetContent(string projectFileContent)

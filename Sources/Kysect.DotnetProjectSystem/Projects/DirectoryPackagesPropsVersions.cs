@@ -67,8 +67,6 @@ public class DirectoryPackagesPropsVersions
             XmlAttributeSyntax versionAttribute = xmlElementSyntax.GetAttribute("Version").ThrowIfNull();
             XmlAttributeSyntax? changedVersionAttribute = versionAttribute.WithValue(ExtendedSyntaxFactory.XmlString(version));
             _projectFile.UpdateDocument(d => d.ReplaceNode(versionAttribute, changedVersionAttribute));
-
-            return;
         }
     }
 }

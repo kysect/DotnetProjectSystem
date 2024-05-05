@@ -7,30 +7,6 @@ namespace Kysect.DotnetProjectSystem.Projects;
 
 public class DotnetProjectFileProperties(DotnetProjectFile projectFile)
 {
-    public bool? FindEnableDefaultItems()
-    {
-        return FindBooleanProperty(DotnetProjectFileConstant.EnableDefaultItems);
-    }
-
-    public bool GetEnableDefaultItemsOrDefault()
-    {
-        return FindEnableDefaultItems() ?? projectFile.IsSdkFormat();
-    }
-
-    public bool? FindBooleanProperty(string propertyName)
-    {
-        propertyName.ThrowIfNull();
-
-        DotnetProjectProperty? property = FindProperty(propertyName);
-        if (property is null)
-            return null;
-
-        if (!bool.TryParse(property.Value.Value, out bool result))
-            throw new DotnetProjectSystemException($"Cannot parse project property value {property} to bool");
-
-        return result;
-    }
-
     public IReadOnlyCollection<DotnetProjectProperty> GetProperties(string property)
     {
         return projectFile
@@ -50,6 +26,20 @@ public class DotnetProjectFileProperties(DotnetProjectFile projectFile)
             return null;
 
         return properties.Single();
+    }
+
+    public bool? FindBooleanProperty(string propertyName)
+    {
+        propertyName.ThrowIfNull();
+
+        DotnetProjectProperty? property = FindProperty(propertyName);
+        if (property is null)
+            return null;
+
+        if (!bool.TryParse(property.Value.Value, out bool result))
+            throw new DotnetProjectSystemException($"Cannot parse project property value {property} to bool");
+
+        return result;
     }
 
     public DotnetProjectProperty GetProperty(string property)
@@ -107,5 +97,15 @@ public class DotnetProjectFileProperties(DotnetProjectFile projectFile)
 
         projectFile.UpdateDocument(d => d.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia));
         return this;
+    }
+
+    public bool? FindEnableDefaultItems()
+    {
+        return FindBooleanProperty(DotnetProjectFileConstant.EnableDefaultItems);
+    }
+
+    public bool GetEnableDefaultItemsOrDefault()
+    {
+        return FindEnableDefaultItems() ?? projectFile.IsSdkFormat();
     }
 }

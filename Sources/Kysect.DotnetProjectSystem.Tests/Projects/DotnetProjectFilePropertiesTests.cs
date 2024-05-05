@@ -6,11 +6,56 @@ namespace Kysect.DotnetProjectSystem.Tests.Projects;
 
 public class DotnetProjectFilePropertiesTests
 {
-    private readonly XmlDocumentSyntaxFormatter _formatter;
+    private readonly XmlDocumentSyntaxFormatter _formatter = new();
 
-    public DotnetProjectFilePropertiesTests()
+    [Fact]
+    public void GetProperties_EmptyFile_ReturnEmptyCollection()
     {
-        _formatter = new XmlDocumentSyntaxFormatter();
+        var sut = DotnetProjectFile.CreateEmpty();
+
+        IReadOnlyCollection<DotnetProjectProperty> values = sut.Properties.GetProperties("Property");
+
+        values.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetProperties_OneProperty_ReturnCollectionWithOneElement()
+    {
+        const string content = """
+                               <Project>
+                                 <PropertyGroup>
+                                   <Property>Value</Property>
+                                 </PropertyGroup>
+                               </Project>
+                               """;
+        var sut = DotnetProjectFile.Create(content);
+
+        IReadOnlyCollection<DotnetProjectProperty> values = sut.Properties.GetProperties("Property");
+
+        values.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void GetProperties_TwoProperty_ReturnExpectedCollection()
+    {
+        var expected = new DotnetProjectProperty[]
+        {
+            new DotnetProjectProperty("Property", "Value1"),
+            new DotnetProjectProperty("Property", "Value2"),
+        };
+        const string content = """
+                               <Project>
+                                 <PropertyGroup>
+                                   <Property>Value1</Property>
+                                   <Property>Value2</Property>
+                                 </PropertyGroup>
+                               </Project>
+                               """;
+        var sut = DotnetProjectFile.Create(content);
+
+        IReadOnlyCollection<DotnetProjectProperty> values = sut.Properties.GetProperties("Property");
+
+        values.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
@@ -194,5 +239,37 @@ public class DotnetProjectFilePropertiesTests
             .RemoveProperty("ManagePackageVersionsCentrally");
 
         projectFile.ToXmlString(_formatter).Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetEnableDefaultItemsOrDefault_ProjectFileSetTrue_ReturnTrue()
+    {
+        const string input = """
+                             <Project>
+                               <PropertyGroup>
+                                 <EnableDefaultItems>true</EnableDefaultItems>
+                               </PropertyGroup>
+                             </Project>
+                             """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile.Create(input);
+
+        projectFile.Properties.GetEnableDefaultItemsOrDefault().Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetEnableDefaultItemsOrDefault_ProjectFileSetFalse_ReturnFalse()
+    {
+        const string input = """
+                             <Project>
+                               <PropertyGroup>
+                                 <EnableDefaultItems>false</EnableDefaultItems>
+                               </PropertyGroup>
+                             </Project>
+                             """;
+
+        DotnetProjectFile projectFile = DotnetProjectFile.Create(input);
+
+        projectFile.Properties.GetEnableDefaultItemsOrDefault().Should().BeFalse();
     }
 }
