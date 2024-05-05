@@ -14,7 +14,7 @@
   <PropertyGroup>
     <RepositoryUrl>https://github.com/kysect/DotnetProjectSystem</RepositoryUrl>
     <PackageProjectUrl>https://github.com/kysect/DotnetProjectSystem</PackageProjectUrl>
-    <Version>0.1.16</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <!-- Code configuration -->
