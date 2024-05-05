@@ -1,6 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.CommonLib.Exceptions;
-using Kysect.DotnetProjectSystem.Tools;
 using Microsoft.Language.Xml;
 using System.Text;
 
@@ -14,47 +13,20 @@ public class XmlDocumentSyntaxFormatter
     {
         documentSyntax.ThrowIfNull();
 
-        List<XmlNodeSyntax> elements = documentSyntax
-            .Descendants()
-            .OfType<IXmlElement>()
-            .Select(x => x.AsSyntaxElement.AsNode)
-            .ToList();
-
-        documentSyntax =
-            documentSyntax
-                .ReplaceNodes(
-                    elements,
-                    (o, u) => UpdateElement(documentSyntax, (IXmlElement) o, (IXmlElement) u));
-
-        return documentSyntax;
+        return documentSyntax.ReplaceElements<IXmlElement>(FormatElement);
     }
 
-    private XmlNodeSyntax UpdateElement(XmlDocumentSyntax documentSyntax, IXmlElement oldNode, IXmlElement currentElement)
+    private XmlNodeSyntax FormatElement(IXmlElement oldNode, IXmlElement updatedNode)
     {
-        currentElement.ThrowIfNull();
+        updatedNode.ThrowIfNull();
 
-        int depth = CalculateDepth(documentSyntax, oldNode);
-        int originalNewLineCount = CalculateOriginalNewLineCount(currentElement);
-        currentElement = FormatAttributes(currentElement);
-        currentElement = AddLeadingTrivia(originalNewLineCount, depth, currentElement);
+        int indentCount = oldNode.GetNodeDepthIndex();
+        int originalNewLineCount = CalculateOriginalNewLineCount(updatedNode);
 
-        return currentElement.AsSyntaxElement.AsNode;
-    }
+        updatedNode = FormatAttributes(updatedNode);
+        updatedNode = AddLeadingTrivia(originalNewLineCount, indentCount, oldNode, updatedNode);
 
-    private int CalculateDepth(XmlDocumentSyntax _, IXmlElement currentElement)
-    {
-        int depth = 0;
-
-        while (currentElement.Parent is not null)
-        {
-            if (depth > 10)
-                throw new DotnetProjectSystemException("Cannot calculate XML element depth. Possible StackOverflow.");
-
-            depth++;
-            currentElement = currentElement.Parent;
-        }
-
-        return depth;
+        return updatedNode.AsSyntaxElement.AsNode;
     }
 
     private int CalculateOriginalNewLineCount(IXmlElement currentElement)
@@ -108,20 +80,23 @@ public class XmlDocumentSyntaxFormatter
         return currentElementSyntax.AsElement;
     }
 
-    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, IXmlElement modified)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int indentCount, IXmlElement oldNode, IXmlElement modified)
     {
+        bool isFirstNodeInDocument = oldNode.AsSyntaxElement.AsNode.IsFirstNodeInDocument();
+
         if (modified is XmlEmptyElementSyntax xmlEmptyElementSyntax)
-            return AddLeadingTrivia(originalNewLineCount, depth, xmlEmptyElementSyntax);
+            return AddLeadingTrivia(originalNewLineCount, indentCount, xmlEmptyElementSyntax, isFirstNodeInDocument);
 
         if (modified is XmlElementSyntax xmlElementSyntax)
-            return AddLeadingTrivia(originalNewLineCount, depth, xmlElementSyntax);
+            return AddLeadingTrivia(originalNewLineCount, indentCount, xmlElementSyntax, isFirstNodeInDocument);
 
         throw SwitchDefaultExceptions.OnUnexpectedType(modified);
     }
 
-    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, XmlEmptyElementSyntax xmlEmptyElementSyntax)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int indentCount, XmlEmptyElementSyntax xmlEmptyElementSyntax, bool isFirstNodeInDocument)
     {
-        string trivia = GetTrivia(originalNewLineCount, depth);
+        int newLineCount = isFirstNodeInDocument ? 0 : Math.Max(originalNewLineCount, 1);
+        string trivia = GetTrivia(indentCount, newLineCount);
 
         xmlEmptyElementSyntax = xmlEmptyElementSyntax.ReplaceNode(
             xmlEmptyElementSyntax.LessThanToken,
@@ -130,37 +105,31 @@ public class XmlDocumentSyntaxFormatter
         return xmlEmptyElementSyntax;
     }
 
-    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int depth, XmlElementSyntax xmlElementSyntax)
+    private IXmlElement AddLeadingTrivia(int originalNewLineCount, int indentCount, XmlElementSyntax xmlElementSyntax, bool isFirstNodeInDocument)
     {
-        string openNodeTrivia = GetTrivia(originalNewLineCount, depth);
-        string closeNodeTrivia = GetTrivia(1, depth);
-
-        // TODO: remove this hack for first node
-        bool needTriviaForStartTag = depth != 0;
-        if (needTriviaForStartTag)
-        {
-            xmlElementSyntax = xmlElementSyntax.ReplaceNode(
+        int openNodeNewLineCount = isFirstNodeInDocument ? 0 : Math.Max(originalNewLineCount, 1);
+        string openNodeTrivia = GetTrivia(indentCount, openNodeNewLineCount);
+        xmlElementSyntax = xmlElementSyntax.ReplaceNode(
                 xmlElementSyntax.StartTag,
                 xmlElementSyntax.StartTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(openNodeTrivia)));
-        }
 
         bool needTriviaForEndTag = xmlElementSyntax.Elements.Any();
+        int closeNodeNewLineCount = needTriviaForEndTag ? 1 : 0;
+        string closeNodeTrivia = GetTrivia(indentCount, closeNodeNewLineCount);
         if (needTriviaForEndTag)
         {
             xmlElementSyntax = xmlElementSyntax.ReplaceNode(
                 xmlElementSyntax.EndTag,
                 xmlElementSyntax.EndTag.WithLeadingTrivia(SyntaxFactory.WhitespaceTrivia(closeNodeTrivia)));
-
         }
 
         return xmlElementSyntax;
     }
 
-    private string GetTrivia(int originalNewLineCount, int depth)
+    private string GetTrivia(int depth, int newLineCount)
     {
         var sb = new StringBuilder();
 
-        int newLineCount = Math.Max(originalNewLineCount, 1);
         for (int i = 0; i < newLineCount; i++)
             sb = sb.AppendLine();
 
