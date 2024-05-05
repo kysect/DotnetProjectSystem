@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - run: git config --global core.autocrlf input
+    - run: git config --global core.autocrlf true
     - uses: actions/checkout@v3
 
     - name: Setup .NET
