@@ -70,6 +70,18 @@ public class DotnetProjectFileTests
     }
 
     [Fact]
+    public void Create_NotProjectNode_ThrowException()
+    {
+        const string input = "<SomeNode />";
+
+        FluentActions
+            .Invoking(() => DotnetProjectFile.Create(input))
+            .Should()
+            .Throw<ArgumentException>()
+            .WithMessage("XML root must be Project");
+    }
+
+    [Fact]
     public void GetProjectNode_ForEmptyNode_ReturnProjectNode()
     {
         var sut = DotnetProjectFile.CreateEmpty();
