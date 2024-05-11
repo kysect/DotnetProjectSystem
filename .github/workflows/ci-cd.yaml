@@ -1,0 +1,13 @@
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    uses: Kysect/.github/.github/workflows/dotnet-releaser.yaml@master
+    with:
+      dotnet-version: '8.0'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

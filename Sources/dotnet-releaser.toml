@@ -1,0 +1,6 @@
+# configuration file for dotnet-releaser
+[msbuild]
+project = "Kysect.DotnetProjectSystem.sln"
+[github]
+user = "kysect"
+repo = "DotnetProjectSystem"
