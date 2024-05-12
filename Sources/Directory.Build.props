@@ -1,41 +1,29 @@
 <Project>
-  <!-- Default project values -->
-  <PropertyGroup>
-    <Authors>Kysect</Authors>
-    <Company>Kysect</Company>
-    <PackageIcon>Kysect-logo.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Copyright>Copyright (c) Kysect 2024</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
-
   <!-- Specific project values -->
   <PropertyGroup>
+    <Description>Kysect.DotnetProjectSystem is a nuget package for working with .sln, .csproj and .props files</Description>
     <RepositoryUrl>https://github.com/kysect/DotnetProjectSystem</RepositoryUrl>
     <PackageProjectUrl>https://github.com/kysect/DotnetProjectSystem</PackageProjectUrl>
   </PropertyGroup>
 
   <!-- Code configuration -->
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <UseArtifactsOutput>true</UseArtifactsOutput>
-    <DebugType>portable</DebugType>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kysect.Editorconfig" />
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/Readme.md" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kysect.SolutionDefaults">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="MinVer">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="$(Configuration) == 'Release'">
-    <None Include="$(MSBuildThisFileDirectory)..\Images\Kysect-logo.png" Pack="true" PackagePath="\" />
-    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
 </Project>
